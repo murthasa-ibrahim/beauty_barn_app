@@ -59,9 +59,13 @@ class NavigationService {
         GoRoute(
           path: Routes.search,
           name: RouteNames.search,
-          builder: (context, state) => const SearchPage(),
+          builder: (context, state) =>  SearchPage(),
         ),
       ],
     );
   }
 }
+
+
+
+

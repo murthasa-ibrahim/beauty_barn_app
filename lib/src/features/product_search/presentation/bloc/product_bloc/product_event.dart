@@ -13,4 +13,13 @@ class ProductEvent with _$ProductEvent {
   factory ProductEvent.getSimilarProductsEvent({
     required String productId,
   }) = GetSimilarProductsEvent;
+
+factory ProductEvent.toggleBrand(String brand) = ToggleBrandEvent;
+factory ProductEvent.selectPriceRange(String? range) = SelectPriceRangeEvent;
+factory ProductEvent.setCustomPriceRange({String? min, String? max}) = SetCustomPriceRangeEvent;
+factory ProductEvent.selectRating(double rating) = SelectRatingEvent;
+factory ProductEvent.resetFilters() = ResetFiltersEvent;
+factory ProductEvent.applyFilters() = ApplyFiltersEvent;
+factory ProductEvent.refreshUi() = RefreshUiEvent; // just for UI rebuild
+
 }

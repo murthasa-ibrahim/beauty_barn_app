@@ -35,15 +35,15 @@ class DioApiService {
           options.headers['Authorization'] = 'Bearer $token';
         }
         if (kDebugMode) {
-          AppLogger.i(
+          AppLogger.d(
               " [${options.method}] ${options.uri} \nHeaders: ${options.headers}");
         }
         return handler.next(options);
       },
       onResponse: (response, handler) {
         if (kDebugMode) {
-          AppLogger.i(
-              "[${response.statusCode}] ${response.requestOptions.uri}");
+          // AppLogger.i(
+          //     "[${response.statusCode}] ${response.requestOptions.uri}");
         }
         return handler.next(response);
       },

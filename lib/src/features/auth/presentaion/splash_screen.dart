@@ -23,7 +23,7 @@ class _SplashScreenState extends State<SplashScreen> {
     final token = Api.token;
 
     if (!mounted) return;
-    context.push(RouteNames.search);
+    context.push(Routes.search);
     // if (token != null && token.isNotEmpty) {
     //   Navigator.pushReplacement(
     //     context,
