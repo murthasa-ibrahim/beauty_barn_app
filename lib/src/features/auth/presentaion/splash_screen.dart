@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:machine_test_superlabs/config/constants/app_colors.dart';
+import 'package:machine_test_superlabs/config/routes/routes.dart';
 import 'package:machine_test_superlabs/src/services/remote/base/base.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -21,7 +23,7 @@ class _SplashScreenState extends State<SplashScreen> {
     final token = Api.token;
 
     if (!mounted) return;
-
+    context.push(RouteNames.search);
     // if (token != null && token.isNotEmpty) {
     //   Navigator.pushReplacement(
     //     context,

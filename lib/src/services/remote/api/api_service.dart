@@ -1,287 +1,154 @@
+import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:machine_test_superlabs/src/utils/logger/app_logger.dart';
 
-import '../../../../config/dependency_injection/dependency_injection.dart';
-import '../../local/app_cache.dart';
 import '../base/base.dart';
 
 class DioApiService {
   factory DioApiService() => _instance;
-
+  static final DioApiService _instance = DioApiService._internal();
   DioApiService._internal() {
     _initializeDio();
   }
-  static bool isLogout = true;
-  static final DioApiService _instance = DioApiService._internal();
 
-  final Dio _dio = Dio();
+  late final Dio _dio;
 
   void _initializeDio() {
-    _dio.options = BaseOptions(
-      baseUrl: Api.baseUrl,
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
+    _dio = Dio(
+      BaseOptions(
+        baseUrl: Api.baseUrl,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        connectTimeout: const Duration(seconds: 15),
+        receiveTimeout: const Duration(seconds: 15),
+        sendTimeout: const Duration(seconds: 15),
+      ),
     );
+
+    _dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (options, handler) async {
+        final token = Api.token;
+        if (token.isNotEmpty) {
+          options.headers['Authorization'] = 'Bearer $token';
+        }
+        if (kDebugMode) {
+          AppLogger.i(
+              " [${options.method}] ${options.uri} \nHeaders: ${options.headers}");
+        }
+        return handler.next(options);
+      },
+      onResponse: (response, handler) {
+        if (kDebugMode) {
+          AppLogger.i(
+              "[${response.statusCode}] ${response.requestOptions.uri}");
+        }
+        return handler.next(response);
+      },
+      onError: (DioException e, handler) async {
+        if (Api.isLogEnable) {
+          AppLogger.e("Dio Error: ${e.message}");
+        }
+
+        if (e.response?.statusCode == 401) {
+          AppLogger.w("⚠️ Unauthorized - Token may have expired");
+        }
+
+        return handler.next(e);
+      },
+    ));
   }
 
-  String? authToken = "";
-  Future<void> _setAuthTokenHeader({bool clearToken = false}) async {
-    final token = locator<SharedPref>().getToken();
-    if (token != null) {
-      _dio.options.headers['Authorization'] = 'Bearer $token';
-      if (kDebugMode) {
-        AppLogger.e("Token------------------>$token");
-      }
-    } else if (clearToken) {
-      _dio.options.headers.remove('Authorization');
-    }
-    authToken = token;
-    return;
-  }
+  /// -------------------- COMMON REQUEST METHODS --------------------
 
-  Future<Response> get(
+  Future<Response<dynamic>> get(
     String endpoint, {
     Map<String, dynamic>? queryParameters,
     CancelToken? cancelToken,
     Options? options,
-    bool? isAuth,
   }) async {
     try {
-      AppLogger.e(endpoint);
-      if (isAuth == null || isAuth == true) {
-        await _setAuthTokenHeader();
-      }
-
       final response = await _dio.get(
         endpoint,
         queryParameters: queryParameters,
         cancelToken: cancelToken,
         options: options,
       );
-
       return response;
-    } on DioException catch (e, s) {
-      if (Api.isLogEnable) {
-        AppLogger.i(endpoint);
-        AppLogger.e(e.message);
-        AppLogger.trace(e.error, s);
-      }
-
-      return Response(
-        requestOptions: RequestOptions(),
-        statusCode: e.response?.statusCode ?? 404,
-        data: e.response?.data,
-      );
-    } catch (e) {
-      return Response(
-        requestOptions: RequestOptions(),
-        statusCode: 404,
-        data: null,
-      );
-    } finally {
-      if (cancelToken?.isCancelled == false) {
-        cancelToken?.cancel();
-      }
+    } on DioException catch (e) {
+      return _handleError(e);
     }
   }
 
-  Future<Response> post(
+  Future<Response<dynamic>> post(
     String endpoint, {
     Map<String, dynamic>? data,
-    bool clearToken = false,
     Options? options,
   }) async {
     try {
-      await _setAuthTokenHeader(clearToken: clearToken);
       final response = await _dio.post(endpoint, data: data, options: options);
-
-      return response;
-    } on DioException catch (e, stack) {
-      if (Api.isLogEnable) {
-        AppLogger.i(e.requestOptions.data);
-        AppLogger.trace(e.error, stack);
-        AppLogger.w(e.response?.statusCode);
-      }
-
-      return Response(
-        requestOptions: RequestOptions(),
-        statusCode: e.response?.statusCode,
-        data: e.response?.data,
-      );
-    } catch (e) {
-      return Response(
-        requestOptions: RequestOptions(),
-        statusCode: 404,
-        data: null,
-      );
-    }
-  }
-
-  Future<Response> postWithoutToken(String endpoint,
-      {Map<String, dynamic>? data}) async {
-    try {
-      final response = await _dio.post(endpoint, data: data);
-      if (Api.isLogEnable) {
-        AppLogger.i(endpoint);
-        AppLogger.d(response);
-      }
-
-      return response;
-    } on DioException catch (e, stack) {
-      if (Api.isLogEnable) {
-        AppLogger.i(e.requestOptions.data);
-        AppLogger.w(e.response?.statusCode);
-        AppLogger.trace(e.error, stack);
-      }
-
-      return Response(
-        requestOptions: RequestOptions(),
-        statusCode: e.response?.statusCode,
-        data: e.response?.data,
-      );
-    }
-  }
-
-  Future<Response> put(String endpoint, {Map<String, dynamic>? data}) async {
-    try {
-      await _setAuthTokenHeader();
-      final response = await _dio.put(endpoint, data: data);
-      if (Api.isLogEnable) {
-        AppLogger.d(response);
-      }
-
-      return response;
-    } on DioException catch (e, stack) {
-      if (Api.isLogEnable) {
-        AppLogger.d(e.response);
-        AppLogger.trace(e.error, stack);
-      }
-
-      return Response(
-        requestOptions: RequestOptions(),
-        statusCode: e.response?.statusCode,
-        data: e.response?.data,
-      );
-    }
-  }
-
-  Future<Response> patch(String endpoint, {Map<String, dynamic>? data}) async {
-    try {
-      await _setAuthTokenHeader();
-      final response = await _dio.patch(endpoint, data: data);
-      if (Api.isLogEnable) {
-        AppLogger.d(response);
-      }
-
-      return response;
-    } on DioException catch (e, stack) {
-      if (Api.isLogEnable) {
-        AppLogger.trace(e.error, stack);
-        AppLogger.i(e.requestOptions.uri);
-        AppLogger.d(e.response);
-      }
-
-      return Response(
-          requestOptions: RequestOptions(),
-          statusCode: e.response?.statusCode,
-          data: e.response?.data);
-    }
-  }
-
-  Future<Response> postFormData(
-    String endpoint, {
-    required Map<String, dynamic> data,
-  }) async {
-    final formData = FormData.fromMap(data);
-    try {
-      await _setAuthTokenHeader();
-      final response = await _dio.post(endpoint, data: formData);
-      AppLogger.e(
-          "Status Code------>${response.statusCode}+ Status Message---->${response.statusMessage}");
-      return response;
-    } on DioException catch (e, stack) {
-      if (Api.isLogEnable) {
-        AppLogger.trace(e, stack);
-      }
-
-      return Response(
-        requestOptions: RequestOptions(),
-        statusCode: e.response?.statusCode,
-        data: e.response?.data,
-      );
-    }
-  }
-
-  Future<Response> patchFormData(
-    String endpoint, {
-    required Map<String, dynamic> data,
-  }) async {
-    final formData = FormData.fromMap(data);
-    try {
-      await _setAuthTokenHeader();
-      final response = await _dio.patch(endpoint, data: formData);
-      AppLogger.e(
-          "Status Code------>${response.statusCode}+ Status Message---->${response.statusMessage}");
-      return response;
-    } on DioException catch (e, stack) {
-      if (Api.isLogEnable) {
-        AppLogger.trace(e, stack);
-      }
-
-      return Response(
-        requestOptions: RequestOptions(),
-        statusCode: e.response?.statusCode,
-        data: e.response?.data,
-      );
-    }
-  }
-
-  Future<Response> postImage(String endpoint, {required FormData data}) async {
-    try {
-      await _setAuthTokenHeader();
-      final response = await _dio.post(endpoint, data: data);
-      if (Api.isLogEnable) {
-        AppLogger.e(response.data);
-        AppLogger.i(response.requestOptions.uri);
-        AppLogger.e(
-            "Status Code------>${response.statusCode}+ Status Message---->${response.statusMessage}");
-      }
-
       return response;
     } on DioException catch (e) {
-      AppLogger.i(e.response?.requestOptions.uri);
-      return Response(
-        requestOptions: RequestOptions(),
-        statusCode: 404,
-        data: e.response?.data,
-      );
+      return _handleError(e);
     }
   }
 
-  Future<Response> delete(String endpoint, {Map<String, dynamic>? data}) async {
+  Future<Response<dynamic>> put(
+    String endpoint, {
+    Map<String, dynamic>? data,
+  }) async {
     try {
-      await _setAuthTokenHeader();
-      final response = await _dio.delete(endpoint, data: data);
-      if (Api.isLogEnable) {
-        AppLogger.e(
-            "Status Code------>${response.statusCode}+ Status Message---->${response.statusMessage}");
-        AppLogger.d(response);
-      }
-
+      final response = await _dio.put(endpoint, data: data);
       return response;
-    } on DioException catch (e, stack) {
-      if (Api.isLogEnable) {
-        AppLogger.trace(e.response, stack);
-      }
-
-      return Response(
-        requestOptions: RequestOptions(),
-        statusCode: 404,
-        data: e.response?.data,
-      );
+    } on DioException catch (e) {
+      return _handleError(e);
     }
+  }
+
+  Future<Response<dynamic>> patch(
+    String endpoint, {
+    Map<String, dynamic>? data,
+  }) async {
+    try {
+      final response = await _dio.patch(endpoint, data: data);
+      return response;
+    } on DioException catch (e) {
+      return _handleError(e);
+    }
+  }
+
+  Future<Response<dynamic>> delete(
+    String endpoint, {
+    Map<String, dynamic>? data,
+  }) async {
+    try {
+      final response = await _dio.delete(endpoint, data: data);
+      return response;
+    } on DioException catch (e) {
+      return _handleError(e);
+    }
+  }
+
+  /// -------------------- PRIVATE HELPERS --------------------
+
+  Response _handleError(DioException e) {
+    final statusCode = e.response?.statusCode ?? 500;
+    final message =
+        e.response?.data?['message'] ?? e.message ?? 'Unknown Error';
+
+    AppLogger.e("Dio Error [$statusCode]: $message");
+
+    return Response(
+      requestOptions: e.requestOptions,
+      statusCode: statusCode,
+      data: {
+        'error': true,
+        'statusCode': statusCode,
+        'message': message,
+        'data': e.response?.data,
+      },
+    );
   }
 }
