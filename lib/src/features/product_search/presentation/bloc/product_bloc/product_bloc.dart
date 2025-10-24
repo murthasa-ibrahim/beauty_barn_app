@@ -29,6 +29,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     on<FetchBrandsEvent>(_onFetchBrands);
     on<GetProductDetail>(_onFetchProductDetail);
     on<GetSimilarProductsEvent>(_getSimilarProduct);
+    on<GetSearchSuggestion>(_getSuggestion);
+    on<ClearSearchSuggestions>(_clearSuggestions);
   }
 
   // 🔹 Search products
@@ -213,5 +215,27 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     } catch (e, s) {
       AppLogger.trace(e, s);
     }
+  }
+
+  Future<void> _getSuggestion(
+    GetSearchSuggestion event,
+    Emitter<ProductState> emit,
+  ) async {
+    try {
+      if ((event.query?.length ?? 0) < 3) return;
+      final suggestion = await repo.getSuggestions(event.query ?? '');
+      emit(state.copyWith(
+        searchSuggestions: suggestion?.data?.products ?? [],
+      ));
+    } catch (e, s) {
+      AppLogger.trace(e, s);
+    }
+  }
+
+  void _clearSuggestions(
+    ClearSearchSuggestions event,
+    Emitter<ProductState> emit,
+  ) {
+    emit(state.copyWith(searchSuggestions: []));
   }
 }

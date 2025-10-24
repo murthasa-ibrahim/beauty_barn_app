@@ -1,14 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:machine_test_superlabs/config/constants/constants.dart';
 import 'package:machine_test_superlabs/config/routes/routes.dart';
 import 'package:machine_test_superlabs/src/features/product_search/model/product_search_model.dart';
 import 'package:machine_test_superlabs/src/features/product_search/presentation/pages/filter_page.dart';
 import 'package:machine_test_superlabs/src/services/remote/base/base.dart';
 import '../bloc/product_bloc/product_bloc.dart';
 
-class SearchPage extends StatelessWidget {
+class SearchPage extends StatefulWidget {
   SearchPage({super.key});
 
   final List<String> categories = [
@@ -20,9 +21,118 @@ class SearchPage extends StatelessWidget {
   ];
 
   @override
+  State<SearchPage> createState() => _SearchPageState();
+}
+
+class _SearchPageState extends State<SearchPage> {
+  final TextEditingController _controller = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+  Timer? _debounce;
+  String _selectedCategory = '';
+
+  @override
+  void initState() {
+    super.initState();
+    // Optionally prefetch popular suggestions or brands if needed
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String value) {
+    // Debounce to avoid too many API calls
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      if (value.trim().length >= 2) {
+        context
+            .read<ProductBloc>()
+            .add(ProductEvent.getSearchSuggestion(query: value.trim()));
+      } else {
+        // clear suggestions if under 2 chars
+        context.read<ProductBloc>().add(ProductEvent.refreshUi());
+      }
+    });
+  }
+
+  void _onSubmitted(String value) {
+    final q = value.trim();
+    if (q.isEmpty) return;
+    context.read<ProductBloc>().add(ProductEvent.searchProductsEvent(query: q));
+    context.read<ProductBloc>().add(ProductEvent.clearSearchSuggestions());
+    _focusNode.unfocus();
+  }
+
+  void _onSuggestionTap(SearchProduct suggestion) {
+    // set the text first
+    _controller.text = suggestion.title ?? '';
+    final query = suggestion.title ?? '';
+
+    // Dispatch events
+    context
+        .read<ProductBloc>()
+        .add(ProductEvent.searchProductsEvent(query: query));
+    context
+        .read<ProductBloc>()
+        .add(ProductEvent.getProductDetail(id: suggestion.handle ?? ''));
+    context.read<ProductBloc>().add(
+        ProductEvent.getSimilarProductsEvent(productId: suggestion.id ?? ''));
+
+    // schedule navigation after current frame to avoid hit-test/layout timing issues
+    Future.microtask(() {
+      context.push(Routes.productDetail);
+    });
+
+    // unfocus keyboard
+    _focusNode.unfocus();
+  }
+
+  Widget _buildSuggestionTile(BuildContext context, SearchProduct suggestion) {
+    final imageUrl = suggestion.thumbnail;
+    final imageWidget = (imageUrl != null && imageUrl.isNotEmpty)
+        ? Image.network(
+            Uri.encodeFull(Api.baseUrl + imageUrl),
+            width: 48,
+            height: 48,
+            fit: BoxFit.cover,
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return SizedBox(
+                  width: 48,
+                  height: 48,
+                  child:
+                      Center(child: CircularProgressIndicator(strokeWidth: 2)));
+            },
+            errorBuilder: (_, __, ___) =>
+                const Icon(Icons.image_outlined, size: 40),
+          )
+        : const Icon(Icons.image_outlined, size: 40);
+
+    return ListTile(
+      leading:
+          ClipRRect(borderRadius: BorderRadius.circular(6), child: imageWidget),
+      title: Text(suggestion.title ?? ''),
+      subtitle: suggestion.handle != null
+          ? Text(suggestion.handle!,
+              style: const TextStyle(fontSize: 12, color: Colors.grey))
+          : null,
+      onTap: () => _onSuggestionTap(suggestion),
+      dense: true,
+      visualDensity: VisualDensity.compact,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final controller = TextEditingController();
-    String selectedCategory = '';
+    // compute maximum suggestions box height accounting for keyboard
+    final mq = MediaQuery.of(context);
+    final keyboardHeight = mq.viewInsets.bottom;
+    // leave space for categories, filters and product grid — suggestions limited to 38% or keyboard adjusted
+    final maxSuggestionHeight = (mq.size.height - keyboardHeight) * 0.38;
 
     return PopScope(
       canPop: false,
@@ -42,21 +152,79 @@ class SearchPage extends StatelessWidget {
         ),
         body: Column(
           children: [
-            // Search Bar
+            // Search + suggestions area
             Padding(
               padding: const EdgeInsets.all(12),
-              child: TextField(
-                controller: controller,
-                decoration: const InputDecoration(
-                  labelText: 'Search products...',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.search),
-                ),
-                onSubmitted: (value) {
-                  context
-                      .read<ProductBloc>()
-                      .add(ProductEvent.searchProductsEvent(query: value));
-                },
+              child: Column(
+                children: [
+                  TextField(
+                    controller: _controller,
+                    focusNode: _focusNode,
+                    textInputAction: TextInputAction.search,
+                    decoration: InputDecoration(
+                      labelText: 'Search products...',
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _controller.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _controller.clear();
+                                context
+                                    .read<ProductBloc>()
+                                    .add(ProductEvent.refreshUi());
+                                context
+                                    .read<ProductBloc>()
+                                    .add(ProductEvent.clearSearchSuggestions());
+                              },
+                            )
+                          : null,
+                    ),
+                    onChanged: _onSearchChanged,
+                    onSubmitted: _onSubmitted,
+                  ),
+
+                  // Suggestions list (shows only when suggestions available & 2+ chars)
+                  BlocBuilder<ProductBloc, ProductState>(
+                    builder: (context, state) {
+                      final suggestions = state.searchSuggestions;
+                      if (_controller.text.trim().length < 2 ||
+                          suggestions.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+
+                      // constrained box prevents overflow when keyboard open
+                      return Container(
+                        margin: const EdgeInsets.only(top: 8),
+                        constraints: BoxConstraints(
+                          maxHeight: maxSuggestionHeight,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              blurRadius: 6,
+                              color: Colors.black.withOpacity(0.06),
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          physics: const ClampingScrollPhysics(),
+                          itemCount: suggestions.length,
+                          separatorBuilder: (_, __) => const Divider(height: 1),
+                          itemBuilder: (context, index) {
+                            final suggestion = suggestions[index];
+                            return _buildSuggestionTile(context, suggestion);
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
             ),
 
@@ -66,10 +234,10 @@ class SearchPage extends StatelessWidget {
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
-                itemCount: categories.length,
+                itemCount: widget.categories.length,
                 itemBuilder: (context, index) {
-                  final category = categories[index];
-                  final isSelected = category == selectedCategory;
+                  final category = widget.categories[index];
+                  final isSelected = category == _selectedCategory;
 
                   return Padding(
                     padding: const EdgeInsets.only(right: 8.0),
@@ -77,7 +245,9 @@ class SearchPage extends StatelessWidget {
                       label: Text(category),
                       selected: isSelected,
                       onSelected: (selected) {
-                        selectedCategory = selected ? category : '';
+                        setState(() {
+                          _selectedCategory = selected ? category : '';
+                        });
                         context.read<ProductBloc>().add(
                               ProductEvent.searchProductsEvent(
                                 query: category.toLowerCase(),
@@ -106,7 +276,7 @@ class SearchPage extends StatelessWidget {
               ),
             ),
 
-            // Products Grid
+            // Products Grid (flexible so suggestions/keyboard don't overflow)
             Expanded(
               child: BlocBuilder<ProductBloc, ProductState>(
                 builder: (context, state) {
@@ -120,7 +290,8 @@ class SearchPage extends StatelessWidget {
                         crossAxisCount: 2,
                         mainAxisSpacing: 12,
                         crossAxisSpacing: 12,
-                        childAspectRatio: 0.5, // adjust card height
+                        childAspectRatio:
+                            0.6, // adjusted for better card height
                       ),
                       itemCount: state.searchProducts.length,
                       itemBuilder: (context, index) {
@@ -128,13 +299,15 @@ class SearchPage extends StatelessWidget {
                         return ProductCard(
                           product: product,
                           onTap: () {
+                            // dispatch detail + similar and navigate (schedule navigation)
                             context.read<ProductBloc>().add(
                                 ProductEvent.getProductDetail(
                                     id: product.handle));
                             context.read<ProductBloc>().add(
                                 ProductEvent.getSimilarProductsEvent(
                                     productId: product.id ?? ''));
-                            context.push(Routes.productDetail);
+                            Future.microtask(
+                                () => context.push(Routes.productDetail));
                           },
                         );
                       },
@@ -166,6 +339,8 @@ class FilterChipWidget extends StatelessWidget {
         label: Text(label),
         onPressed: () {
           // Open filter modal for this filter
+          Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const ProductFilterPage()));
         },
       ),
     );
@@ -185,7 +360,7 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final imageUrl = product.thumbnail?.isNotEmpty == true
+    final imageUrl = (product.thumbnail?.isNotEmpty == true)
         ? product.thumbnail
         : (product.productImages?.isNotEmpty == true
             ? product.productImages![0].image
@@ -194,11 +369,9 @@ class ProductCard extends StatelessWidget {
     final price = product.variants?.isNotEmpty == true
         ? product.variants![0].currentPrice
         : product.priceStart;
-
     final specialPrice = product.variants?.isNotEmpty == true
         ? product.variants![0].specialPrice
         : null;
-
     final averageRating = product.averageRating?.toStringAsFixed(1);
 
     return InkWell(
@@ -217,15 +390,28 @@ class ProductCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
                 child: imageUrl != null
                     ? Image.network(
-                        "${Api.baseUrl + imageUrl}",
-                        // imageUrl,
+                        Uri.encodeFull(Api.baseUrl + imageUrl),
                         width: double.infinity,
-                        height: 120,
+                        height: 130,
                         fit: BoxFit.cover,
+                        loadingBuilder: (context, child, progress) {
+                          if (progress == null) return child;
+                          return SizedBox(
+                              height: 130,
+                              child: Center(
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2)));
+                        },
                         errorBuilder: (context, error, stackTrace) =>
-                            const Icon(Icons.image_not_supported, size: 80),
+                            const SizedBox(
+                          height: 130,
+                          child: Center(
+                              child: Icon(Icons.image_not_supported, size: 48)),
+                        ),
                       )
-                    : const Icon(Icons.image, size: 80),
+                    : const SizedBox(
+                        height: 130,
+                        child: Center(child: Icon(Icons.image, size: 48))),
               ),
               const SizedBox(height: 8),
               // Title
@@ -248,7 +434,7 @@ class ProductCard extends StatelessWidget {
                 children: [
                   if (specialPrice != null && specialPrice < (price ?? 0))
                     Text(
-                      "\$$specialPrice",
+                      "₹${specialPrice.toStringAsFixed(0)}",
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.green,
@@ -257,7 +443,7 @@ class ProductCard extends StatelessWidget {
                   if (specialPrice != null && specialPrice < (price ?? 0))
                     const SizedBox(width: 6),
                   Text(
-                    "\$$price",
+                    "₹${(price ?? 0).toStringAsFixed(0)}",
                     style: TextStyle(
                       fontWeight:
                           specialPrice != null && specialPrice < (price ?? 0)
@@ -274,19 +460,18 @@ class ProductCard extends StatelessWidget {
                   ),
                 ],
               ),
-              kHeight5,
+              const SizedBox(height: 6),
               // Rating & Orders
               if (averageRating != null)
                 Row(
                   children: [
                     const Icon(Icons.star, size: 14, color: Colors.amber),
-                    const SizedBox(width: 2),
+                    const SizedBox(width: 4),
                     Text(averageRating, style: const TextStyle(fontSize: 12)),
                     const SizedBox(width: 8),
-                    Text(
-                      "${product.ordersCount} orders",
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
-                    ),
+                    Text("${product.ordersCount ?? 0} orders",
+                        style:
+                            const TextStyle(fontSize: 12, color: Colors.grey)),
                   ],
                 ),
             ],

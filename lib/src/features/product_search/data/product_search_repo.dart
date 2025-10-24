@@ -73,16 +73,16 @@ class ProductRepo {
   }
 
   /// 🔹 Suggestions
-  Future<List<String>?> getSuggestions(String query) async {
+  Future<SearchProductResponse ?> getSuggestions(String query) async {
     try {
       final response = await _apiService.get(
-        '/store/product-search/suggestions',
+        EndPoints.searchSuggestion,
         queryParameters: {'q': query},
       );
 
       if (response.statusCode == 200) {
-        final List suggestions = response.data['suggestions'] ?? [];
-        return suggestions.cast<String>();
+        final data = SearchProductResponse.fromJson(response.data);
+        return data;
       }
       return null;
     } catch (e, s) {
@@ -109,7 +109,8 @@ class ProductRepo {
 
   Future<List<SimilarProduct>?> getSimilarProducts(String id) async {
     try {
-      final response = await _apiService.get('/store/product/$id/similar?limit=10');
+      final response =
+          await _apiService.get('/store/product/$id/similar?limit=10');
 
       if (response.statusCode == 200) {
         final data = SimilarProductResponse.fromJson(response.data);
@@ -145,6 +146,4 @@ class ProductRepo {
       return null;
     }
   }
-
-  
 }

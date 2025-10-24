@@ -62,6 +62,8 @@ extension ProductEventPatterns on ProductEvent {
     TResult Function(RefreshUiEvent value)? refreshUi,
     TResult Function(FetchBrandsEvent value)? fetchBrands,
     TResult Function(GetProductDetail value)? getProductDetail,
+    TResult Function(GetSearchSuggestion value)? getSearchSuggestion,
+    TResult Function(ClearSearchSuggestions value)? clearSearchSuggestions,
     required TResult orElse(),
   }) {
     final _that = this;
@@ -90,6 +92,10 @@ extension ProductEventPatterns on ProductEvent {
         return fetchBrands(_that);
       case GetProductDetail() when getProductDetail != null:
         return getProductDetail(_that);
+      case GetSearchSuggestion() when getSearchSuggestion != null:
+        return getSearchSuggestion(_that);
+      case ClearSearchSuggestions() when clearSearchSuggestions != null:
+        return clearSearchSuggestions(_that);
       case _:
         return orElse();
     }
@@ -125,6 +131,9 @@ extension ProductEventPatterns on ProductEvent {
     required TResult Function(RefreshUiEvent value) refreshUi,
     required TResult Function(FetchBrandsEvent value) fetchBrands,
     required TResult Function(GetProductDetail value) getProductDetail,
+    required TResult Function(GetSearchSuggestion value) getSearchSuggestion,
+    required TResult Function(ClearSearchSuggestions value)
+        clearSearchSuggestions,
   }) {
     final _that = this;
     switch (_that) {
@@ -152,6 +161,10 @@ extension ProductEventPatterns on ProductEvent {
         return fetchBrands(_that);
       case GetProductDetail():
         return getProductDetail(_that);
+      case GetSearchSuggestion():
+        return getSearchSuggestion(_that);
+      case ClearSearchSuggestions():
+        return clearSearchSuggestions(_that);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -183,6 +196,8 @@ extension ProductEventPatterns on ProductEvent {
     TResult? Function(RefreshUiEvent value)? refreshUi,
     TResult? Function(FetchBrandsEvent value)? fetchBrands,
     TResult? Function(GetProductDetail value)? getProductDetail,
+    TResult? Function(GetSearchSuggestion value)? getSearchSuggestion,
+    TResult? Function(ClearSearchSuggestions value)? clearSearchSuggestions,
   }) {
     final _that = this;
     switch (_that) {
@@ -210,6 +225,10 @@ extension ProductEventPatterns on ProductEvent {
         return fetchBrands(_that);
       case GetProductDetail() when getProductDetail != null:
         return getProductDetail(_that);
+      case GetSearchSuggestion() when getSearchSuggestion != null:
+        return getSearchSuggestion(_that);
+      case ClearSearchSuggestions() when clearSearchSuggestions != null:
+        return clearSearchSuggestions(_that);
       case _:
         return null;
     }
@@ -241,6 +260,8 @@ extension ProductEventPatterns on ProductEvent {
     TResult Function()? refreshUi,
     TResult Function(String? search)? fetchBrands,
     TResult Function(String? id)? getProductDetail,
+    TResult Function(String? query)? getSearchSuggestion,
+    TResult Function()? clearSearchSuggestions,
     required TResult orElse(),
   }) {
     final _that = this;
@@ -269,6 +290,10 @@ extension ProductEventPatterns on ProductEvent {
         return fetchBrands(_that.search);
       case GetProductDetail() when getProductDetail != null:
         return getProductDetail(_that.id);
+      case GetSearchSuggestion() when getSearchSuggestion != null:
+        return getSearchSuggestion(_that.query);
+      case ClearSearchSuggestions() when clearSearchSuggestions != null:
+        return clearSearchSuggestions();
       case _:
         return orElse();
     }
@@ -301,6 +326,8 @@ extension ProductEventPatterns on ProductEvent {
     required TResult Function() refreshUi,
     required TResult Function(String? search) fetchBrands,
     required TResult Function(String? id) getProductDetail,
+    required TResult Function(String? query) getSearchSuggestion,
+    required TResult Function() clearSearchSuggestions,
   }) {
     final _that = this;
     switch (_that) {
@@ -328,6 +355,10 @@ extension ProductEventPatterns on ProductEvent {
         return fetchBrands(_that.search);
       case GetProductDetail():
         return getProductDetail(_that.id);
+      case GetSearchSuggestion():
+        return getSearchSuggestion(_that.query);
+      case ClearSearchSuggestions():
+        return clearSearchSuggestions();
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -359,6 +390,8 @@ extension ProductEventPatterns on ProductEvent {
     TResult? Function()? refreshUi,
     TResult? Function(String? search)? fetchBrands,
     TResult? Function(String? id)? getProductDetail,
+    TResult? Function(String? query)? getSearchSuggestion,
+    TResult? Function()? clearSearchSuggestions,
   }) {
     final _that = this;
     switch (_that) {
@@ -386,6 +419,10 @@ extension ProductEventPatterns on ProductEvent {
         return fetchBrands(_that.search);
       case GetProductDetail() when getProductDetail != null:
         return getProductDetail(_that.id);
+      case GetSearchSuggestion() when getSearchSuggestion != null:
+        return getSearchSuggestion(_that.query);
+      case ClearSearchSuggestions() when clearSearchSuggestions != null:
+        return clearSearchSuggestions();
       case _:
         return null;
     }
@@ -1041,6 +1078,90 @@ class _$GetProductDetailCopyWithImpl<$Res>
 }
 
 /// @nodoc
+
+class GetSearchSuggestion implements ProductEvent {
+  const GetSearchSuggestion({this.query});
+
+  final String? query;
+
+  /// Create a copy of ProductEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $GetSearchSuggestionCopyWith<GetSearchSuggestion> get copyWith =>
+      _$GetSearchSuggestionCopyWithImpl<GetSearchSuggestion>(this, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is GetSearchSuggestion &&
+            (identical(other.query, query) || other.query == query));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, query);
+
+  @override
+  String toString() {
+    return 'ProductEvent.getSearchSuggestion(query: $query)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $GetSearchSuggestionCopyWith<$Res>
+    implements $ProductEventCopyWith<$Res> {
+  factory $GetSearchSuggestionCopyWith(
+          GetSearchSuggestion value, $Res Function(GetSearchSuggestion) _then) =
+      _$GetSearchSuggestionCopyWithImpl;
+  @useResult
+  $Res call({String? query});
+}
+
+/// @nodoc
+class _$GetSearchSuggestionCopyWithImpl<$Res>
+    implements $GetSearchSuggestionCopyWith<$Res> {
+  _$GetSearchSuggestionCopyWithImpl(this._self, this._then);
+
+  final GetSearchSuggestion _self;
+  final $Res Function(GetSearchSuggestion) _then;
+
+  /// Create a copy of ProductEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? query = freezed,
+  }) {
+    return _then(GetSearchSuggestion(
+      query: freezed == query
+          ? _self.query
+          : query // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ));
+  }
+}
+
+/// @nodoc
+
+class ClearSearchSuggestions implements ProductEvent {
+  const ClearSearchSuggestions();
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is ClearSearchSuggestions);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  String toString() {
+    return 'ProductEvent.clearSearchSuggestions()';
+  }
+}
+
+/// @nodoc
 mixin _$ProductState {
   bool get isLoading;
   List<SearchProduct> get searchProducts;
@@ -1055,6 +1176,7 @@ mixin _$ProductState {
   bool get isBrandLoading;
   ProductDetailData? get productDetail;
   List<SimilarProduct> get similarProducts;
+  List<SearchProduct> get searchSuggestions;
 
   /// Create a copy of ProductState
   /// with the given fields replaced by the non-null parameter values.
@@ -1093,7 +1215,9 @@ mixin _$ProductState {
             (identical(other.productDetail, productDetail) ||
                 other.productDetail == productDetail) &&
             const DeepCollectionEquality()
-                .equals(other.similarProducts, similarProducts));
+                .equals(other.similarProducts, similarProducts) &&
+            const DeepCollectionEquality()
+                .equals(other.searchSuggestions, searchSuggestions));
   }
 
   @override
@@ -1111,11 +1235,12 @@ mixin _$ProductState {
       const DeepCollectionEquality().hash(allBrands),
       isBrandLoading,
       productDetail,
-      const DeepCollectionEquality().hash(similarProducts));
+      const DeepCollectionEquality().hash(similarProducts),
+      const DeepCollectionEquality().hash(searchSuggestions));
 
   @override
   String toString() {
-    return 'ProductState(isLoading: $isLoading, searchProducts: $searchProducts, selectedBrands: $selectedBrands, selectedPriceRange: $selectedPriceRange, selectedRating: $selectedRating, minPrice: $minPrice, maxPrice: $maxPrice, appliedFilters: $appliedFilters, lastQuery: $lastQuery, allBrands: $allBrands, isBrandLoading: $isBrandLoading, productDetail: $productDetail, similarProducts: $similarProducts)';
+    return 'ProductState(isLoading: $isLoading, searchProducts: $searchProducts, selectedBrands: $selectedBrands, selectedPriceRange: $selectedPriceRange, selectedRating: $selectedRating, minPrice: $minPrice, maxPrice: $maxPrice, appliedFilters: $appliedFilters, lastQuery: $lastQuery, allBrands: $allBrands, isBrandLoading: $isBrandLoading, productDetail: $productDetail, similarProducts: $similarProducts, searchSuggestions: $searchSuggestions)';
   }
 }
 
@@ -1138,7 +1263,8 @@ abstract mixin class $ProductStateCopyWith<$Res> {
       List<Brand> allBrands,
       bool isBrandLoading,
       ProductDetailData? productDetail,
-      List<SimilarProduct> similarProducts});
+      List<SimilarProduct> similarProducts,
+      List<SearchProduct> searchSuggestions});
 }
 
 /// @nodoc
@@ -1166,6 +1292,7 @@ class _$ProductStateCopyWithImpl<$Res> implements $ProductStateCopyWith<$Res> {
     Object? isBrandLoading = null,
     Object? productDetail = freezed,
     Object? similarProducts = null,
+    Object? searchSuggestions = null,
   }) {
     return _then(_self.copyWith(
       isLoading: null == isLoading
@@ -1220,6 +1347,10 @@ class _$ProductStateCopyWithImpl<$Res> implements $ProductStateCopyWith<$Res> {
           ? _self.similarProducts
           : similarProducts // ignore: cast_nullable_to_non_nullable
               as List<SimilarProduct>,
+      searchSuggestions: null == searchSuggestions
+          ? _self.searchSuggestions
+          : searchSuggestions // ignore: cast_nullable_to_non_nullable
+              as List<SearchProduct>,
     ));
   }
 }
@@ -1330,7 +1461,8 @@ extension ProductStatePatterns on ProductState {
             List<Brand> allBrands,
             bool isBrandLoading,
             ProductDetailData? productDetail,
-            List<SimilarProduct> similarProducts)?
+            List<SimilarProduct> similarProducts,
+            List<SearchProduct> searchSuggestions)?
         $default, {
     required TResult orElse(),
   }) {
@@ -1350,7 +1482,8 @@ extension ProductStatePatterns on ProductState {
             _that.allBrands,
             _that.isBrandLoading,
             _that.productDetail,
-            _that.similarProducts);
+            _that.similarProducts,
+            _that.searchSuggestions);
       case _:
         return orElse();
     }
@@ -1384,7 +1517,8 @@ extension ProductStatePatterns on ProductState {
             List<Brand> allBrands,
             bool isBrandLoading,
             ProductDetailData? productDetail,
-            List<SimilarProduct> similarProducts)
+            List<SimilarProduct> similarProducts,
+            List<SearchProduct> searchSuggestions)
         $default,
   ) {
     final _that = this;
@@ -1403,7 +1537,8 @@ extension ProductStatePatterns on ProductState {
             _that.allBrands,
             _that.isBrandLoading,
             _that.productDetail,
-            _that.similarProducts);
+            _that.similarProducts,
+            _that.searchSuggestions);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -1436,7 +1571,8 @@ extension ProductStatePatterns on ProductState {
             List<Brand> allBrands,
             bool isBrandLoading,
             ProductDetailData? productDetail,
-            List<SimilarProduct> similarProducts)?
+            List<SimilarProduct> similarProducts,
+            List<SearchProduct> searchSuggestions)?
         $default,
   ) {
     final _that = this;
@@ -1455,7 +1591,8 @@ extension ProductStatePatterns on ProductState {
             _that.allBrands,
             _that.isBrandLoading,
             _that.productDetail,
-            _that.similarProducts);
+            _that.similarProducts,
+            _that.searchSuggestions);
       case _:
         return null;
     }
@@ -1478,12 +1615,14 @@ class _ProductState implements ProductState {
       required final List<Brand> allBrands,
       required this.isBrandLoading,
       required this.productDetail,
-      required final List<SimilarProduct> similarProducts})
+      required final List<SimilarProduct> similarProducts,
+      required final List<SearchProduct> searchSuggestions})
       : _searchProducts = searchProducts,
         _selectedBrands = selectedBrands,
         _appliedFilters = appliedFilters,
         _allBrands = allBrands,
-        _similarProducts = similarProducts;
+        _similarProducts = similarProducts,
+        _searchSuggestions = searchSuggestions;
 
   @override
   final bool isLoading;
@@ -1543,6 +1682,15 @@ class _ProductState implements ProductState {
     return EqualUnmodifiableListView(_similarProducts);
   }
 
+  final List<SearchProduct> _searchSuggestions;
+  @override
+  List<SearchProduct> get searchSuggestions {
+    if (_searchSuggestions is EqualUnmodifiableListView)
+      return _searchSuggestions;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_searchSuggestions);
+  }
+
   /// Create a copy of ProductState
   /// with the given fields replaced by the non-null parameter values.
   @override
@@ -1581,7 +1729,9 @@ class _ProductState implements ProductState {
             (identical(other.productDetail, productDetail) ||
                 other.productDetail == productDetail) &&
             const DeepCollectionEquality()
-                .equals(other._similarProducts, _similarProducts));
+                .equals(other._similarProducts, _similarProducts) &&
+            const DeepCollectionEquality()
+                .equals(other._searchSuggestions, _searchSuggestions));
   }
 
   @override
@@ -1599,11 +1749,12 @@ class _ProductState implements ProductState {
       const DeepCollectionEquality().hash(_allBrands),
       isBrandLoading,
       productDetail,
-      const DeepCollectionEquality().hash(_similarProducts));
+      const DeepCollectionEquality().hash(_similarProducts),
+      const DeepCollectionEquality().hash(_searchSuggestions));
 
   @override
   String toString() {
-    return 'ProductState(isLoading: $isLoading, searchProducts: $searchProducts, selectedBrands: $selectedBrands, selectedPriceRange: $selectedPriceRange, selectedRating: $selectedRating, minPrice: $minPrice, maxPrice: $maxPrice, appliedFilters: $appliedFilters, lastQuery: $lastQuery, allBrands: $allBrands, isBrandLoading: $isBrandLoading, productDetail: $productDetail, similarProducts: $similarProducts)';
+    return 'ProductState(isLoading: $isLoading, searchProducts: $searchProducts, selectedBrands: $selectedBrands, selectedPriceRange: $selectedPriceRange, selectedRating: $selectedRating, minPrice: $minPrice, maxPrice: $maxPrice, appliedFilters: $appliedFilters, lastQuery: $lastQuery, allBrands: $allBrands, isBrandLoading: $isBrandLoading, productDetail: $productDetail, similarProducts: $similarProducts, searchSuggestions: $searchSuggestions)';
   }
 }
 
@@ -1628,7 +1779,8 @@ abstract mixin class _$ProductStateCopyWith<$Res>
       List<Brand> allBrands,
       bool isBrandLoading,
       ProductDetailData? productDetail,
-      List<SimilarProduct> similarProducts});
+      List<SimilarProduct> similarProducts,
+      List<SearchProduct> searchSuggestions});
 }
 
 /// @nodoc
@@ -1657,6 +1809,7 @@ class __$ProductStateCopyWithImpl<$Res>
     Object? isBrandLoading = null,
     Object? productDetail = freezed,
     Object? similarProducts = null,
+    Object? searchSuggestions = null,
   }) {
     return _then(_ProductState(
       isLoading: null == isLoading
@@ -1711,6 +1864,10 @@ class __$ProductStateCopyWithImpl<$Res>
           ? _self._similarProducts
           : similarProducts // ignore: cast_nullable_to_non_nullable
               as List<SimilarProduct>,
+      searchSuggestions: null == searchSuggestions
+          ? _self._searchSuggestions
+          : searchSuggestions // ignore: cast_nullable_to_non_nullable
+              as List<SearchProduct>,
     ));
   }
 }

@@ -24,4 +24,7 @@ class ProductEvent with _$ProductEvent {
   factory ProductEvent.refreshUi() = RefreshUiEvent;
   const factory ProductEvent.fetchBrands({String? search}) = FetchBrandsEvent;
   const factory ProductEvent.getProductDetail({String? id}) = GetProductDetail;
+  const factory ProductEvent.getSearchSuggestion({String? query}) =
+      GetSearchSuggestion;
+  const factory ProductEvent.clearSearchSuggestions() = ClearSearchSuggestions;
 }
