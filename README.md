@@ -1,4 +1,4 @@
-![2e0dd736-3080-4167-956c-39e15b4b1d18](https://github.com/user-attachments/assets/50356453-3559-4ffa-baf2-dab88718d88d)# Beauty Barn - App
+# Beauty Barn
 
 Beauty Barn is a Flutter application built as a machine test project. It allows users to search, filter, and explore beauty products with a modern and clean UI.
 
