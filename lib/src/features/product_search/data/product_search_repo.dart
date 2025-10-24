@@ -1,6 +1,9 @@
 import 'package:machine_test_superlabs/config/dependency_injection/dependency_injection.dart';
+import 'package:machine_test_superlabs/src/features/product_search/model/brand_model.dart';
+import 'package:machine_test_superlabs/src/features/product_search/model/product_detail_model.dart';
 import 'package:machine_test_superlabs/src/features/product_search/model/product_model.dart';
 import 'package:machine_test_superlabs/src/features/product_search/model/product_search_model.dart';
+import 'package:machine_test_superlabs/src/features/product_search/model/similar_product.dart';
 import 'package:machine_test_superlabs/src/utils/logger/app_logger.dart';
 
 import '../../../services/remote/api/api_service.dart' show DioApiService;
@@ -9,7 +12,6 @@ import '../../../services/remote/end_points/end_points.dart';
 class ProductRepo {
   final _apiService = locator<DioApiService>();
 
-  /// 🔍 Search products with optional filters
   Future<ProductData?> searchProducts({
     required String query,
     int page = 1,
@@ -18,8 +20,8 @@ class ProductRepo {
     List<String>? categories,
     List<String>? collections,
     Map<String, String>? attributes,
-    double? minPrice,
-    double? maxPrice,
+    String? minPrice,
+    String? maxPrice,
     double? minRating,
     String? tag,
     String? sortBy,
@@ -42,9 +44,8 @@ class ProductRepo {
         queryParams['collections'] = collections.join(',');
       }
       if (attributes != null && attributes.isNotEmpty) {
-        queryParams['attributes'] = attributes.entries
-            .map((e) => '${e.key}:${e.value}')
-            .join(',');
+        queryParams['attributes'] =
+            attributes.entries.map((e) => '${e.key}:${e.value}').join(',');
       }
       if (minPrice != null) queryParams['minPrice'] = minPrice;
       if (maxPrice != null) queryParams['maxPrice'] = maxPrice;
@@ -91,28 +92,12 @@ class ProductRepo {
   }
 
   /// 📋 Get single product by handler
-  Future<Product?> getProductByHandler(String handler) async {
+  Future<ProductDetailData?> getProductByHandler(String handler) async {
     try {
       final response = await _apiService.get('/store/product/$handler');
 
       if (response.statusCode == 200) {
-        final data = ProductResponse.fromJson(response.data);
-        return data.data?.first;
-      }
-      return null;
-    } catch (e, s) {
-      AppLogger.trace(e, s);
-      return null;
-    }
-  }
-
-  /// 🔁 Get similar products
-  Future<List<Product>?> getSimilarProducts(String id) async {
-    try {
-      final response = await _apiService.get('/store/product/$id/similar');
-
-      if (response.statusCode == 200) {
-        final data = ProductResponse.fromJson(response.data);
+        final data = ProductDetailResponse.fromJson(response.data);
         return data.data;
       }
       return null;
@@ -121,4 +106,45 @@ class ProductRepo {
       return null;
     }
   }
+
+  Future<List<SimilarProduct>?> getSimilarProducts(String id) async {
+    try {
+      final response = await _apiService.get('/store/product/$id/similar?limit=10');
+
+      if (response.statusCode == 200) {
+        final data = SimilarProductResponse.fromJson(response.data);
+        return data.data;
+      }
+      return null;
+    } catch (e, s) {
+      AppLogger.trace(e, s);
+      return null;
+    }
+  }
+
+  Future<List<Brand>?> fetchBrands({
+    String? search,
+    int page = 1,
+    int limit = 20,
+  }) async {
+    try {
+      final response = await _apiService.get(EndPoints.brand, queryParameters: {
+        'page': page.toString(),
+        'limit': limit.toString(),
+        if (search != null && search.isNotEmpty) 'search': search,
+      });
+
+      if (response.statusCode == 200) {
+        final data = BrandResponse.fromJson(response.data);
+        return data.data;
+      }
+      AppLogger.e("Fetch brands API error: ${response.statusCode}");
+      return null;
+    } catch (e, s) {
+      AppLogger.trace(e, s);
+      return null;
+    }
+  }
+
+  
 }

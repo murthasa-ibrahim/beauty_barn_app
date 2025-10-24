@@ -12,6 +12,10 @@ abstract class ProductState with _$ProductState {
     required String? maxPrice,
     required Map<String, dynamic>? appliedFilters,
     required String? lastQuery,
+    required List<Brand> allBrands,
+    required bool isBrandLoading,
+    required ProductDetailData? productDetail,
+    required List<SimilarProduct> similarProducts,
   }) = _ProductState;
 
   factory ProductState.initial() => const ProductState(
@@ -23,6 +27,10 @@ abstract class ProductState with _$ProductState {
         minPrice: null,
         maxPrice: null,
         appliedFilters: {},
-        lastQuery:null,
+        lastQuery: null,
+        allBrands: [],
+        isBrandLoading: false,
+        productDetail: null,
+        similarProducts:[],
       );
 }

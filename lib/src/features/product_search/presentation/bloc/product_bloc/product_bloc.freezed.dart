@@ -60,6 +60,8 @@ extension ProductEventPatterns on ProductEvent {
     TResult Function(ResetFiltersEvent value)? resetFilters,
     TResult Function(ApplyFiltersEvent value)? applyFilters,
     TResult Function(RefreshUiEvent value)? refreshUi,
+    TResult Function(FetchBrandsEvent value)? fetchBrands,
+    TResult Function(GetProductDetail value)? getProductDetail,
     required TResult orElse(),
   }) {
     final _that = this;
@@ -84,6 +86,10 @@ extension ProductEventPatterns on ProductEvent {
         return applyFilters(_that);
       case RefreshUiEvent() when refreshUi != null:
         return refreshUi(_that);
+      case FetchBrandsEvent() when fetchBrands != null:
+        return fetchBrands(_that);
+      case GetProductDetail() when getProductDetail != null:
+        return getProductDetail(_that);
       case _:
         return orElse();
     }
@@ -117,6 +123,8 @@ extension ProductEventPatterns on ProductEvent {
     required TResult Function(ResetFiltersEvent value) resetFilters,
     required TResult Function(ApplyFiltersEvent value) applyFilters,
     required TResult Function(RefreshUiEvent value) refreshUi,
+    required TResult Function(FetchBrandsEvent value) fetchBrands,
+    required TResult Function(GetProductDetail value) getProductDetail,
   }) {
     final _that = this;
     switch (_that) {
@@ -140,6 +148,10 @@ extension ProductEventPatterns on ProductEvent {
         return applyFilters(_that);
       case RefreshUiEvent():
         return refreshUi(_that);
+      case FetchBrandsEvent():
+        return fetchBrands(_that);
+      case GetProductDetail():
+        return getProductDetail(_that);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -169,6 +181,8 @@ extension ProductEventPatterns on ProductEvent {
     TResult? Function(ResetFiltersEvent value)? resetFilters,
     TResult? Function(ApplyFiltersEvent value)? applyFilters,
     TResult? Function(RefreshUiEvent value)? refreshUi,
+    TResult? Function(FetchBrandsEvent value)? fetchBrands,
+    TResult? Function(GetProductDetail value)? getProductDetail,
   }) {
     final _that = this;
     switch (_that) {
@@ -192,6 +206,10 @@ extension ProductEventPatterns on ProductEvent {
         return applyFilters(_that);
       case RefreshUiEvent() when refreshUi != null:
         return refreshUi(_that);
+      case FetchBrandsEvent() when fetchBrands != null:
+        return fetchBrands(_that);
+      case GetProductDetail() when getProductDetail != null:
+        return getProductDetail(_that);
       case _:
         return null;
     }
@@ -221,6 +239,8 @@ extension ProductEventPatterns on ProductEvent {
     TResult Function()? resetFilters,
     TResult Function()? applyFilters,
     TResult Function()? refreshUi,
+    TResult Function(String? search)? fetchBrands,
+    TResult Function(String? id)? getProductDetail,
     required TResult orElse(),
   }) {
     final _that = this;
@@ -245,6 +265,10 @@ extension ProductEventPatterns on ProductEvent {
         return applyFilters();
       case RefreshUiEvent() when refreshUi != null:
         return refreshUi();
+      case FetchBrandsEvent() when fetchBrands != null:
+        return fetchBrands(_that.search);
+      case GetProductDetail() when getProductDetail != null:
+        return getProductDetail(_that.id);
       case _:
         return orElse();
     }
@@ -275,6 +299,8 @@ extension ProductEventPatterns on ProductEvent {
     required TResult Function() resetFilters,
     required TResult Function() applyFilters,
     required TResult Function() refreshUi,
+    required TResult Function(String? search) fetchBrands,
+    required TResult Function(String? id) getProductDetail,
   }) {
     final _that = this;
     switch (_that) {
@@ -298,6 +324,10 @@ extension ProductEventPatterns on ProductEvent {
         return applyFilters();
       case RefreshUiEvent():
         return refreshUi();
+      case FetchBrandsEvent():
+        return fetchBrands(_that.search);
+      case GetProductDetail():
+        return getProductDetail(_that.id);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -327,6 +357,8 @@ extension ProductEventPatterns on ProductEvent {
     TResult? Function()? resetFilters,
     TResult? Function()? applyFilters,
     TResult? Function()? refreshUi,
+    TResult? Function(String? search)? fetchBrands,
+    TResult? Function(String? id)? getProductDetail,
   }) {
     final _that = this;
     switch (_that) {
@@ -350,6 +382,10 @@ extension ProductEventPatterns on ProductEvent {
         return applyFilters();
       case RefreshUiEvent() when refreshUi != null:
         return refreshUi();
+      case FetchBrandsEvent() when fetchBrands != null:
+        return fetchBrands(_that.search);
+      case GetProductDetail() when getProductDetail != null:
+        return getProductDetail(_that.id);
       case _:
         return null;
     }
@@ -877,6 +913,134 @@ class RefreshUiEvent implements ProductEvent {
 }
 
 /// @nodoc
+
+class FetchBrandsEvent implements ProductEvent {
+  const FetchBrandsEvent({this.search});
+
+  final String? search;
+
+  /// Create a copy of ProductEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $FetchBrandsEventCopyWith<FetchBrandsEvent> get copyWith =>
+      _$FetchBrandsEventCopyWithImpl<FetchBrandsEvent>(this, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is FetchBrandsEvent &&
+            (identical(other.search, search) || other.search == search));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, search);
+
+  @override
+  String toString() {
+    return 'ProductEvent.fetchBrands(search: $search)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $FetchBrandsEventCopyWith<$Res>
+    implements $ProductEventCopyWith<$Res> {
+  factory $FetchBrandsEventCopyWith(
+          FetchBrandsEvent value, $Res Function(FetchBrandsEvent) _then) =
+      _$FetchBrandsEventCopyWithImpl;
+  @useResult
+  $Res call({String? search});
+}
+
+/// @nodoc
+class _$FetchBrandsEventCopyWithImpl<$Res>
+    implements $FetchBrandsEventCopyWith<$Res> {
+  _$FetchBrandsEventCopyWithImpl(this._self, this._then);
+
+  final FetchBrandsEvent _self;
+  final $Res Function(FetchBrandsEvent) _then;
+
+  /// Create a copy of ProductEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? search = freezed,
+  }) {
+    return _then(FetchBrandsEvent(
+      search: freezed == search
+          ? _self.search
+          : search // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ));
+  }
+}
+
+/// @nodoc
+
+class GetProductDetail implements ProductEvent {
+  const GetProductDetail({this.id});
+
+  final String? id;
+
+  /// Create a copy of ProductEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $GetProductDetailCopyWith<GetProductDetail> get copyWith =>
+      _$GetProductDetailCopyWithImpl<GetProductDetail>(this, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is GetProductDetail &&
+            (identical(other.id, id) || other.id == id));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, id);
+
+  @override
+  String toString() {
+    return 'ProductEvent.getProductDetail(id: $id)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $GetProductDetailCopyWith<$Res>
+    implements $ProductEventCopyWith<$Res> {
+  factory $GetProductDetailCopyWith(
+          GetProductDetail value, $Res Function(GetProductDetail) _then) =
+      _$GetProductDetailCopyWithImpl;
+  @useResult
+  $Res call({String? id});
+}
+
+/// @nodoc
+class _$GetProductDetailCopyWithImpl<$Res>
+    implements $GetProductDetailCopyWith<$Res> {
+  _$GetProductDetailCopyWithImpl(this._self, this._then);
+
+  final GetProductDetail _self;
+  final $Res Function(GetProductDetail) _then;
+
+  /// Create a copy of ProductEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? id = freezed,
+  }) {
+    return _then(GetProductDetail(
+      id: freezed == id
+          ? _self.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ));
+  }
+}
+
+/// @nodoc
 mixin _$ProductState {
   bool get isLoading;
   List<SearchProduct> get searchProducts;
@@ -887,6 +1051,10 @@ mixin _$ProductState {
   String? get maxPrice;
   Map<String, dynamic>? get appliedFilters;
   String? get lastQuery;
+  List<Brand> get allBrands;
+  bool get isBrandLoading;
+  ProductDetailData? get productDetail;
+  List<SimilarProduct> get similarProducts;
 
   /// Create a copy of ProductState
   /// with the given fields replaced by the non-null parameter values.
@@ -918,7 +1086,14 @@ mixin _$ProductState {
             const DeepCollectionEquality()
                 .equals(other.appliedFilters, appliedFilters) &&
             (identical(other.lastQuery, lastQuery) ||
-                other.lastQuery == lastQuery));
+                other.lastQuery == lastQuery) &&
+            const DeepCollectionEquality().equals(other.allBrands, allBrands) &&
+            (identical(other.isBrandLoading, isBrandLoading) ||
+                other.isBrandLoading == isBrandLoading) &&
+            (identical(other.productDetail, productDetail) ||
+                other.productDetail == productDetail) &&
+            const DeepCollectionEquality()
+                .equals(other.similarProducts, similarProducts));
   }
 
   @override
@@ -932,11 +1107,15 @@ mixin _$ProductState {
       minPrice,
       maxPrice,
       const DeepCollectionEquality().hash(appliedFilters),
-      lastQuery);
+      lastQuery,
+      const DeepCollectionEquality().hash(allBrands),
+      isBrandLoading,
+      productDetail,
+      const DeepCollectionEquality().hash(similarProducts));
 
   @override
   String toString() {
-    return 'ProductState(isLoading: $isLoading, searchProducts: $searchProducts, selectedBrands: $selectedBrands, selectedPriceRange: $selectedPriceRange, selectedRating: $selectedRating, minPrice: $minPrice, maxPrice: $maxPrice, appliedFilters: $appliedFilters, lastQuery: $lastQuery)';
+    return 'ProductState(isLoading: $isLoading, searchProducts: $searchProducts, selectedBrands: $selectedBrands, selectedPriceRange: $selectedPriceRange, selectedRating: $selectedRating, minPrice: $minPrice, maxPrice: $maxPrice, appliedFilters: $appliedFilters, lastQuery: $lastQuery, allBrands: $allBrands, isBrandLoading: $isBrandLoading, productDetail: $productDetail, similarProducts: $similarProducts)';
   }
 }
 
@@ -955,7 +1134,11 @@ abstract mixin class $ProductStateCopyWith<$Res> {
       String? minPrice,
       String? maxPrice,
       Map<String, dynamic>? appliedFilters,
-      String? lastQuery});
+      String? lastQuery,
+      List<Brand> allBrands,
+      bool isBrandLoading,
+      ProductDetailData? productDetail,
+      List<SimilarProduct> similarProducts});
 }
 
 /// @nodoc
@@ -979,6 +1162,10 @@ class _$ProductStateCopyWithImpl<$Res> implements $ProductStateCopyWith<$Res> {
     Object? maxPrice = freezed,
     Object? appliedFilters = freezed,
     Object? lastQuery = freezed,
+    Object? allBrands = null,
+    Object? isBrandLoading = null,
+    Object? productDetail = freezed,
+    Object? similarProducts = null,
   }) {
     return _then(_self.copyWith(
       isLoading: null == isLoading
@@ -1017,6 +1204,22 @@ class _$ProductStateCopyWithImpl<$Res> implements $ProductStateCopyWith<$Res> {
           ? _self.lastQuery
           : lastQuery // ignore: cast_nullable_to_non_nullable
               as String?,
+      allBrands: null == allBrands
+          ? _self.allBrands
+          : allBrands // ignore: cast_nullable_to_non_nullable
+              as List<Brand>,
+      isBrandLoading: null == isBrandLoading
+          ? _self.isBrandLoading
+          : isBrandLoading // ignore: cast_nullable_to_non_nullable
+              as bool,
+      productDetail: freezed == productDetail
+          ? _self.productDetail
+          : productDetail // ignore: cast_nullable_to_non_nullable
+              as ProductDetailData?,
+      similarProducts: null == similarProducts
+          ? _self.similarProducts
+          : similarProducts // ignore: cast_nullable_to_non_nullable
+              as List<SimilarProduct>,
     ));
   }
 }
@@ -1123,7 +1326,11 @@ extension ProductStatePatterns on ProductState {
             String? minPrice,
             String? maxPrice,
             Map<String, dynamic>? appliedFilters,
-            String? lastQuery)?
+            String? lastQuery,
+            List<Brand> allBrands,
+            bool isBrandLoading,
+            ProductDetailData? productDetail,
+            List<SimilarProduct> similarProducts)?
         $default, {
     required TResult orElse(),
   }) {
@@ -1139,7 +1346,11 @@ extension ProductStatePatterns on ProductState {
             _that.minPrice,
             _that.maxPrice,
             _that.appliedFilters,
-            _that.lastQuery);
+            _that.lastQuery,
+            _that.allBrands,
+            _that.isBrandLoading,
+            _that.productDetail,
+            _that.similarProducts);
       case _:
         return orElse();
     }
@@ -1169,7 +1380,11 @@ extension ProductStatePatterns on ProductState {
             String? minPrice,
             String? maxPrice,
             Map<String, dynamic>? appliedFilters,
-            String? lastQuery)
+            String? lastQuery,
+            List<Brand> allBrands,
+            bool isBrandLoading,
+            ProductDetailData? productDetail,
+            List<SimilarProduct> similarProducts)
         $default,
   ) {
     final _that = this;
@@ -1184,7 +1399,11 @@ extension ProductStatePatterns on ProductState {
             _that.minPrice,
             _that.maxPrice,
             _that.appliedFilters,
-            _that.lastQuery);
+            _that.lastQuery,
+            _that.allBrands,
+            _that.isBrandLoading,
+            _that.productDetail,
+            _that.similarProducts);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -1213,7 +1432,11 @@ extension ProductStatePatterns on ProductState {
             String? minPrice,
             String? maxPrice,
             Map<String, dynamic>? appliedFilters,
-            String? lastQuery)?
+            String? lastQuery,
+            List<Brand> allBrands,
+            bool isBrandLoading,
+            ProductDetailData? productDetail,
+            List<SimilarProduct> similarProducts)?
         $default,
   ) {
     final _that = this;
@@ -1228,7 +1451,11 @@ extension ProductStatePatterns on ProductState {
             _that.minPrice,
             _that.maxPrice,
             _that.appliedFilters,
-            _that.lastQuery);
+            _that.lastQuery,
+            _that.allBrands,
+            _that.isBrandLoading,
+            _that.productDetail,
+            _that.similarProducts);
       case _:
         return null;
     }
@@ -1247,10 +1474,16 @@ class _ProductState implements ProductState {
       required this.minPrice,
       required this.maxPrice,
       required final Map<String, dynamic>? appliedFilters,
-      required this.lastQuery})
+      required this.lastQuery,
+      required final List<Brand> allBrands,
+      required this.isBrandLoading,
+      required this.productDetail,
+      required final List<SimilarProduct> similarProducts})
       : _searchProducts = searchProducts,
         _selectedBrands = selectedBrands,
-        _appliedFilters = appliedFilters;
+        _appliedFilters = appliedFilters,
+        _allBrands = allBrands,
+        _similarProducts = similarProducts;
 
   @override
   final bool isLoading;
@@ -1290,6 +1523,25 @@ class _ProductState implements ProductState {
 
   @override
   final String? lastQuery;
+  final List<Brand> _allBrands;
+  @override
+  List<Brand> get allBrands {
+    if (_allBrands is EqualUnmodifiableListView) return _allBrands;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_allBrands);
+  }
+
+  @override
+  final bool isBrandLoading;
+  @override
+  final ProductDetailData? productDetail;
+  final List<SimilarProduct> _similarProducts;
+  @override
+  List<SimilarProduct> get similarProducts {
+    if (_similarProducts is EqualUnmodifiableListView) return _similarProducts;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_similarProducts);
+  }
 
   /// Create a copy of ProductState
   /// with the given fields replaced by the non-null parameter values.
@@ -1321,7 +1573,15 @@ class _ProductState implements ProductState {
             const DeepCollectionEquality()
                 .equals(other._appliedFilters, _appliedFilters) &&
             (identical(other.lastQuery, lastQuery) ||
-                other.lastQuery == lastQuery));
+                other.lastQuery == lastQuery) &&
+            const DeepCollectionEquality()
+                .equals(other._allBrands, _allBrands) &&
+            (identical(other.isBrandLoading, isBrandLoading) ||
+                other.isBrandLoading == isBrandLoading) &&
+            (identical(other.productDetail, productDetail) ||
+                other.productDetail == productDetail) &&
+            const DeepCollectionEquality()
+                .equals(other._similarProducts, _similarProducts));
   }
 
   @override
@@ -1335,11 +1595,15 @@ class _ProductState implements ProductState {
       minPrice,
       maxPrice,
       const DeepCollectionEquality().hash(_appliedFilters),
-      lastQuery);
+      lastQuery,
+      const DeepCollectionEquality().hash(_allBrands),
+      isBrandLoading,
+      productDetail,
+      const DeepCollectionEquality().hash(_similarProducts));
 
   @override
   String toString() {
-    return 'ProductState(isLoading: $isLoading, searchProducts: $searchProducts, selectedBrands: $selectedBrands, selectedPriceRange: $selectedPriceRange, selectedRating: $selectedRating, minPrice: $minPrice, maxPrice: $maxPrice, appliedFilters: $appliedFilters, lastQuery: $lastQuery)';
+    return 'ProductState(isLoading: $isLoading, searchProducts: $searchProducts, selectedBrands: $selectedBrands, selectedPriceRange: $selectedPriceRange, selectedRating: $selectedRating, minPrice: $minPrice, maxPrice: $maxPrice, appliedFilters: $appliedFilters, lastQuery: $lastQuery, allBrands: $allBrands, isBrandLoading: $isBrandLoading, productDetail: $productDetail, similarProducts: $similarProducts)';
   }
 }
 
@@ -1360,7 +1624,11 @@ abstract mixin class _$ProductStateCopyWith<$Res>
       String? minPrice,
       String? maxPrice,
       Map<String, dynamic>? appliedFilters,
-      String? lastQuery});
+      String? lastQuery,
+      List<Brand> allBrands,
+      bool isBrandLoading,
+      ProductDetailData? productDetail,
+      List<SimilarProduct> similarProducts});
 }
 
 /// @nodoc
@@ -1385,6 +1653,10 @@ class __$ProductStateCopyWithImpl<$Res>
     Object? maxPrice = freezed,
     Object? appliedFilters = freezed,
     Object? lastQuery = freezed,
+    Object? allBrands = null,
+    Object? isBrandLoading = null,
+    Object? productDetail = freezed,
+    Object? similarProducts = null,
   }) {
     return _then(_ProductState(
       isLoading: null == isLoading
@@ -1423,6 +1695,22 @@ class __$ProductStateCopyWithImpl<$Res>
           ? _self.lastQuery
           : lastQuery // ignore: cast_nullable_to_non_nullable
               as String?,
+      allBrands: null == allBrands
+          ? _self._allBrands
+          : allBrands // ignore: cast_nullable_to_non_nullable
+              as List<Brand>,
+      isBrandLoading: null == isBrandLoading
+          ? _self.isBrandLoading
+          : isBrandLoading // ignore: cast_nullable_to_non_nullable
+              as bool,
+      productDetail: freezed == productDetail
+          ? _self.productDetail
+          : productDetail // ignore: cast_nullable_to_non_nullable
+              as ProductDetailData?,
+      similarProducts: null == similarProducts
+          ? _self._similarProducts
+          : similarProducts // ignore: cast_nullable_to_non_nullable
+              as List<SimilarProduct>,
     ));
   }
 }

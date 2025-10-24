@@ -27,7 +27,7 @@ class SearchProductResponse {
 
 class ProductData {
   final List<SearchProduct>? products;
-  final List<Brand>? brands;
+  final List<SearchModelBrands>? brands;
   final List<Attribute>? attributes;
   final Map<String, int>? ratingsCounts;
 
@@ -43,7 +43,7 @@ class ProductData {
             ?.map((e) => SearchProduct.fromJson(e))
             .toList(),
         brands: (json['brands'] as List<dynamic>?)
-            ?.map((e) => Brand.fromJson(e))
+            ?.map((e) => SearchModelBrands.fromJson(e))
             .toList(),
         attributes: (json['attributes'] as List<dynamic>?)
             ?.map((e) => Attribute.fromJson(e))
@@ -68,7 +68,7 @@ class SearchProduct {
   final double? averageRating;
   final int? reviewsCount;
   final int? ordersCount;
-  final Brand? brand;
+  final SearchModelBrands? brand;
   final List<ProductCategory>? productCategories;
   final List<ProductCollection>? productCollections;
   final List<ProductAttributeValue>? productValuesForAttribute;
@@ -119,7 +119,7 @@ class SearchProduct {
             : null,
         reviewsCount: json['reviewsCount'] as int?,
         ordersCount: json['ordersCount'] as int?,
-        brand: json['brand'] != null ? Brand.fromJson(json['brand']) : null,
+        brand: json['brand'] != null ? SearchModelBrands.fromJson(json['brand']) : null,
         productCategories: (json['productCategories'] as List<dynamic>?)
             ?.map((e) => ProductCategory.fromJson(e))
             .toList(),
@@ -144,15 +144,15 @@ class SearchProduct {
       );
 }
 
-class Brand {
+class SearchModelBrands {
   final String? id;
   final String? handle;
   final String? title;
   final int? productCount;
 
-  Brand({this.id, this.handle, this.title, this.productCount});
+  SearchModelBrands({this.id, this.handle, this.title, this.productCount});
 
-  factory Brand.fromJson(Map<String, dynamic> json) => Brand(
+  factory SearchModelBrands.fromJson(Map<String, dynamic> json) => SearchModelBrands(
         id: json['id'] as String?,
         handle: json['handle'] as String?,
         title: json['title'] as String? ?? json['name'] as String?,

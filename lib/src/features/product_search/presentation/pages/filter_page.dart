@@ -3,8 +3,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 // import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import '../bloc/product_bloc/product_bloc.dart';
 
-class ProductFilterPage extends StatelessWidget {
+class ProductFilterPage extends StatefulWidget {
   const ProductFilterPage({super.key});
+
+  @override
+  State<ProductFilterPage> createState() => _ProductFilterPageState();
+}
+
+class _ProductFilterPageState extends State<ProductFilterPage> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<ProductBloc>().add(ProductEvent.fetchBrands());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,29 +30,9 @@ class ProductFilterPage extends StatelessWidget {
       {'label': '₹1000 and above', 'min': 1000, 'max': null},
     ];
 
-    final List<String> allBrands = [
-      "L'Oréal",
-      "Maybelline",
-      "MAC",
-      "The Ordinary",
-      "Huda Beauty",
-      "Fenty Beauty",
-      "Dior",
-      "Nykaa",
-      "Charlotte Tilbury",
-      "Clinique",
-      "Estée Lauder",
-    ];
-
     return BlocBuilder<ProductBloc, ProductState>(
       builder: (context, state) {
         final bloc = context.read<ProductBloc>();
-
-        final filteredBrands = allBrands
-            .where((brand) => brand
-                .toLowerCase()
-                .contains(brandSearchController.text.toLowerCase()))
-            .toList();
 
         return Scaffold(
           backgroundColor: Colors.white,
@@ -97,34 +88,48 @@ class ProductFilterPage extends StatelessWidget {
                               ),
                             ),
                             onChanged: (_) {
-                              // local search, not event-based
-                              bloc.add(ProductEvent.refreshUi());
+                              context
+                                  .read<ProductBloc>()
+                                  .add(ProductEvent.fetchBrands());
                             },
                           ),
                           const SizedBox(height: 8),
                           ConstrainedBox(
-                            constraints: const BoxConstraints(maxHeight: 250),
-                            child: ListView.builder(
-                              shrinkWrap: true,
-                              itemCount: filteredBrands.length,
-                              itemBuilder: (context, index) {
-                                final brand = filteredBrands[index];
-                                final isSelected =
-                                    state.selectedBrands.contains(brand);
-                                return CheckboxListTile(
-                                  dense: true,
-                                  contentPadding: EdgeInsets.zero,
-                                  value: isSelected,
-                                  onChanged: (checked) {
-                                    bloc.add(ProductEvent.toggleBrand(brand));
-                                  },
-                                  title: Text(brand),
-                                  controlAffinity:
-                                      ListTileControlAffinity.leading,
-                                );
-                              },
-                            ),
-                          ),
+                              constraints: const BoxConstraints(maxHeight: 250),
+                              child: BlocBuilder<ProductBloc, ProductState>(
+                                builder: (context, state) {
+                                  final bloc = context.read<ProductBloc>();
+
+                                  return state.isBrandLoading
+                                      ? const Center(
+                                          child: CircularProgressIndicator())
+                                      : ListView.builder(
+                                          shrinkWrap: true,
+                                          itemCount: state.allBrands.length,
+                                          itemBuilder: (context, index) {
+                                            final brand =
+                                                state.allBrands[index];
+                                            final isSelected = state
+                                                .selectedBrands
+                                                .contains(brand.title);
+                                            return CheckboxListTile(
+                                              dense: true,
+                                              contentPadding: EdgeInsets.zero,
+                                              value: isSelected,
+                                              onChanged: (_) {
+                                                bloc.add(
+                                                    ProductEvent.toggleBrand(
+                                                        brand.title ?? ''));
+                                              },
+                                              title: Text(brand.title ?? ''),
+                                              controlAffinity:
+                                                  ListTileControlAffinity
+                                                      .leading,
+                                            );
+                                          },
+                                        );
+                                },
+                              )),
                         ],
                       ),
 

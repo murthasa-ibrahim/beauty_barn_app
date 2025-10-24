@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:machine_test_superlabs/config/constants/constants.dart';
+import 'package:machine_test_superlabs/config/routes/routes.dart';
 import 'package:machine_test_superlabs/src/features/product_search/model/product_search_model.dart';
 import 'package:machine_test_superlabs/src/features/product_search/presentation/pages/filter_page.dart';
+import 'package:machine_test_superlabs/src/services/remote/base/base.dart';
 import '../bloc/product_bloc/product_bloc.dart';
 
 class SearchPage extends StatelessWidget {
@@ -20,120 +24,129 @@ class SearchPage extends StatelessWidget {
     final controller = TextEditingController();
     String selectedCategory = '';
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Search Products"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => ProductFilterPage(),
-              ));
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Search Bar
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                labelText: 'Search products...',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.search),
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("Search Products"),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.filter_list),
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => ProductFilterPage(),
+                ));
+              },
+            ),
+          ],
+        ),
+        body: Column(
+          children: [
+            // Search Bar
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: TextField(
+                controller: controller,
+                decoration: const InputDecoration(
+                  labelText: 'Search products...',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.search),
+                ),
+                onSubmitted: (value) {
+                  context
+                      .read<ProductBloc>()
+                      .add(ProductEvent.searchProductsEvent(query: value));
+                },
               ),
-              onSubmitted: (value) {
-                context
-                    .read<ProductBloc>()
-                    .add(ProductEvent.searchProductsEvent(query: value));
-              },
             ),
-          ),
 
-          // Categories Row
-          SizedBox(
-            height: 50,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              itemCount: categories.length,
-              itemBuilder: (context, index) {
-                final category = categories[index];
-                final isSelected = category == selectedCategory;
+            // Categories Row
+            SizedBox(
+              height: 50,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                itemCount: categories.length,
+                itemBuilder: (context, index) {
+                  final category = categories[index];
+                  final isSelected = category == selectedCategory;
 
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: ChoiceChip(
-                    label: Text(category),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      selectedCategory = selected ? category : '';
-                      context.read<ProductBloc>().add(
-                            ProductEvent.searchProductsEvent(
-                              query: category.toLowerCase(),
-                            ),
-                          );
-                    },
-                  ),
-                );
-              },
-            ),
-          ),
-
-          // Filters Row
-          SizedBox(
-            height: 50,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              children: const [
-                FilterChipWidget(label: 'Brand'),
-                FilterChipWidget(label: 'Product Type'),
-                FilterChipWidget(label: 'Skin Concern'),
-                FilterChipWidget(label: 'Skin Type'),
-                FilterChipWidget(label: 'Price'),
-              ],
-            ),
-          ),
-
-          // Products Grid
-          Expanded(
-            child: BlocBuilder<ProductBloc, ProductState>(
-              builder: (context, state) {
-                if (state.isLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (state.searchProducts.isNotEmpty) {
-                  return GridView.builder(
-                    padding: const EdgeInsets.all(12),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 12,
-                      crossAxisSpacing: 12,
-                      childAspectRatio: 0.65, // adjust card height
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: ChoiceChip(
+                      label: Text(category),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        selectedCategory = selected ? category : '';
+                        context.read<ProductBloc>().add(
+                              ProductEvent.searchProductsEvent(
+                                query: category.toLowerCase(),
+                              ),
+                            );
+                      },
                     ),
-                    itemCount: state.searchProducts.length,
-                    itemBuilder: (context, index) {
-                      final product = state.searchProducts[index];
-                      return ProductCard(
-                        product: product,
-                        onTap: () {
-                          // Navigate to Product Page
-                        },
-                      );
-                    },
                   );
-                } else {
-                  return const Center(child: Text("Search for products..."));
-                }
-              },
+                },
+              ),
             ),
-          ),
-        ],
+
+            // Filters Row
+            SizedBox(
+              height: 50,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                children: const [
+                  FilterChipWidget(label: 'Brand'),
+                  FilterChipWidget(label: 'Product Type'),
+                  FilterChipWidget(label: 'Skin Concern'),
+                  FilterChipWidget(label: 'Skin Type'),
+                  FilterChipWidget(label: 'Price'),
+                ],
+              ),
+            ),
+
+            // Products Grid
+            Expanded(
+              child: BlocBuilder<ProductBloc, ProductState>(
+                builder: (context, state) {
+                  if (state.isLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (state.searchProducts.isNotEmpty) {
+                    return GridView.builder(
+                      padding: const EdgeInsets.all(12),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        childAspectRatio: 0.5, // adjust card height
+                      ),
+                      itemCount: state.searchProducts.length,
+                      itemBuilder: (context, index) {
+                        final product = state.searchProducts[index];
+                        return ProductCard(
+                          product: product,
+                          onTap: () {
+                            context.read<ProductBloc>().add(
+                                ProductEvent.getProductDetail(
+                                    id: product.handle));
+                            context.read<ProductBloc>().add(
+                                ProductEvent.getSimilarProductsEvent(
+                                    productId: product.id ?? ''));
+                            context.push(Routes.productDetail);
+                          },
+                        );
+                      },
+                    );
+                  } else {
+                    return const Center(child: Text("Search for products..."));
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -204,7 +217,8 @@ class ProductCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
                 child: imageUrl != null
                     ? Image.network(
-                        imageUrl,
+                        "${Api.baseUrl + imageUrl}",
+                        // imageUrl,
                         width: double.infinity,
                         height: 120,
                         fit: BoxFit.cover,
@@ -260,7 +274,7 @@ class ProductCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 4),
+              kHeight5,
               // Rating & Orders
               if (averageRating != null)
                 Row(
