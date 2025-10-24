@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:machine_test_superlabs/config/constants/app_colors.dart';
 import 'package:machine_test_superlabs/config/routes/routes.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -51,7 +52,7 @@ class _SplashScreenState extends State<SplashScreen>
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF3A1C6C), Color(0xFFD5006D), Colors.black],
+            colors: [Color(0xFF3A1C6C), Color(0xFFD5006D), AppColors.black],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -65,7 +66,7 @@ class _SplashScreenState extends State<SplashScreen>
                   scale: _animation,
                   child: Icon(
                     Icons.shopping_cart_rounded,
-                    color: Colors.white,
+                    color: AppColors.white,
                     size: 100,
                   ),
                 ),
@@ -75,7 +76,7 @@ class _SplashScreenState extends State<SplashScreen>
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AppColors.white,
                     letterSpacing: 1.5,
                   ),
                 ),
@@ -92,7 +93,7 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
                 const SizedBox(height: 20),
                 const CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
                 ),
               ],
             ),

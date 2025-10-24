@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:machine_test_superlabs/config/constants/app_colors.dart';
+import 'package:machine_test_superlabs/config/constants/constants.dart';
 import 'package:machine_test_superlabs/config/routes/routes.dart';
 import 'package:machine_test_superlabs/src/features/product_search/model/product_search_model.dart';
 import 'package:machine_test_superlabs/src/services/remote/base/base.dart';
@@ -17,10 +18,11 @@ class SearchPage extends StatefulWidget {
 
   final List<String> categories = [
     'Makeup',
-    'Skincare',
     'Hair',
-    'Fragrance',
-    'Tools',
+    'Body Care',
+    "Men's Skincare",
+    'Brands',
+    'BestSellers',
   ];
 
   @override
@@ -149,25 +151,27 @@ class _SearchPageState extends State<SearchPage> {
           FocusScope.of(context).unfocus();
         },
         child: Scaffold(
-          appBar: AppBar(
-            title: const Text("Search Products"),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.filter_list),
-                onPressed: () {
-                  FocusScope.of(context).unfocus();
-                  context.push(Routes.filter);
-                },
-              ),
-            ],
-          ),
-          body: Column(
-            children: [
-              buildSearchAndSuggesion(context, maxSuggestionHeight),
-              buildCategorySection(),
-              FilterSection(),
-              ProductListingSection(productScrollCtrl: productScrollCtrl),
-            ],
+          // appBar: AppBar(
+          //   // title: const Text("Search Products"),
+          //   actions: [
+          //     IconButton(
+          //       icon: const Icon(Icons.filter_list),
+          //       onPressed: () {
+          //         FocusScope.of(context).unfocus();
+          //         context.push(Routes.filter);
+          //       },
+          //     ),
+          //   ],
+          // ),
+          body: SafeArea(
+            child: Column(
+              children: [
+                buildSearchAndSuggesion(context, maxSuggestionHeight),
+                buildCategorySection(),
+                FilterSection(),
+                ProductListingSection(productScrollCtrl: productScrollCtrl),
+              ],
+            ),
           ),
         ),
       ),
@@ -180,31 +184,83 @@ class _SearchPageState extends State<SearchPage> {
       padding: const EdgeInsets.all(12),
       child: Column(
         children: [
-          TextField(
-            controller: _controller,
-            focusNode: _focusNode,
-            textInputAction: TextInputAction.search,
-            decoration: InputDecoration(
-              labelText: 'Search products...',
-              border: const OutlineInputBorder(),
-              prefixIcon: const Icon(Icons.search),
-              suffixIcon: _controller.text.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        _controller.clear();
-                        context
-                            .read<ProductBloc>()
-                            .add(ProductEvent.refreshUi());
-                        context
-                            .read<ProductBloc>()
-                            .add(ProductEvent.clearSearchSuggestions());
-                      },
-                    )
-                  : null,
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 6,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: TextField(
+                      controller: _controller,
+                      focusNode: _focusNode,
+                      textInputAction: TextInputAction.search,
+                      decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 14),
+                        hintText: 'Search products...',
+                        hintStyle: TextStyle(color: Colors.grey.shade500),
+                        prefixIcon:
+                            const Icon(Icons.search, color: Colors.black87),
+                        suffixIcon: _controller.text.isNotEmpty
+                            ? IconButton(
+                                icon:
+                                    const Icon(Icons.clear, color: Colors.grey),
+                                onPressed: () {
+                                  _controller.clear();
+                                  context
+                                      .read<ProductBloc>()
+                                      .add(ProductEvent.refreshUi());
+                                  context.read<ProductBloc>().add(
+                                      ProductEvent.clearSearchSuggestions());
+                                },
+                              )
+                            : null,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
+                      ),
+                      onChanged: _onSearchChanged,
+                      onSubmitted: _onSubmitted,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.filter_list, color: Colors.white),
+                    onPressed: () {
+                      FocusScope.of(context).unfocus();
+                      context.push(Routes.filter);
+                    },
+                  ),
+                ),
+              ],
             ),
-            onChanged: _onSearchChanged,
-            onSubmitted: _onSubmitted,
           ),
           BlocBuilder<ProductBloc, ProductState>(
             builder: (context, state) {

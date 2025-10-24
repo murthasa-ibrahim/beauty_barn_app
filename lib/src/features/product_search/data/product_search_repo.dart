@@ -70,7 +70,6 @@ class ProductRepo {
     }
   }
 
-
   Future<SearchProductResponse?> getSuggestions(String query) async {
     try {
       final response = await _apiService.get(
@@ -89,7 +88,6 @@ class ProductRepo {
     }
   }
 
-  /// 📋 Get single product by handler
   Future<ProductDetailData?> getProductByHandler(String handler) async {
     try {
       final response = await _apiService.get('/store/product/$handler');

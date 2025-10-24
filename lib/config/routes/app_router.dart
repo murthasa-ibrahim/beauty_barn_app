@@ -7,8 +7,6 @@ import 'package:machine_test_superlabs/src/features/product_search/presentation/
 import 'package:machine_test_superlabs/src/features/product_search/presentation/pages/search_page.dart';
 
 class NavigationService {
-  // final GlobalKey<NavigatorState> _shellNavigatorKey =
-  //     GlobalKey<NavigatorState>(debugLabel: 'shell');
   final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>(debugLabel: 'root');
 

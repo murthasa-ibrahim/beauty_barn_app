@@ -61,8 +61,6 @@ class DioApiService {
     ));
   }
 
-  /// -------------------- COMMON REQUEST METHODS --------------------
-
   Future<Response<dynamic>> get(
     String endpoint, {
     Map<String, dynamic>? queryParameters,
@@ -130,8 +128,6 @@ class DioApiService {
       return _handleError(e);
     }
   }
-
-  /// -------------------- PRIVATE HELPERS --------------------
 
   Response _handleError(DioException e) {
     final statusCode = e.response?.statusCode ?? 500;
