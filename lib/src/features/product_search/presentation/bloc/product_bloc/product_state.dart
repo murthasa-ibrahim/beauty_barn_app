@@ -19,6 +19,7 @@ abstract class ProductState with _$ProductState {
     required List<SearchProduct> searchSuggestions,
     required int pageProduct,
     required bool haseMoreProduct,
+     required bool productDetailLoading,
     
   }) = _ProductState;
 
@@ -39,6 +40,7 @@ abstract class ProductState with _$ProductState {
         searchSuggestions: [],
         pageProduct: 1,
         haseMoreProduct: true,
+        productDetailLoading:false,
        
       );
 }

@@ -15,10 +15,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   final ProductRepo repo = ProductRepo();
 
   ProductBloc() : super(ProductState.initial()) {
-    // Search
     on<SearchProductsEvent>(_onSearch);
-
-    // Filters
     on<ToggleBrandEvent>(_onToggleBrand);
     on<SelectPriceRangeEvent>(_onSelectPriceRange);
     on<SetCustomPriceRangeEvent>(_onSetCustomPriceRange);
@@ -34,7 +31,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     on<ProductListPagination>(_productPagination);
   }
 
-  // 🔹 Search products
   Future<void> _onSearch(
       SearchProductsEvent event, Emitter<ProductState> emit) async {
     emit(state.copyWith(isLoading: true));
@@ -58,7 +54,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     }
   }
 
-  // 🔹 Toggle brand selection (multi-select)
   void _onToggleBrand(ToggleBrandEvent event, Emitter<ProductState> emit) {
     final newBrands = Set<String>.from(state.selectedBrands);
     if (newBrands.contains(event.brand)) {
@@ -69,7 +64,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     emit(state.copyWith(selectedBrands: newBrands));
   }
 
-  // 🔹 Price range selection (radio)
   void _onSelectPriceRange(
       SelectPriceRangeEvent event, Emitter<ProductState> emit) {
     emit(state.copyWith(
@@ -79,7 +73,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     ));
   }
 
-  // 🔹 Custom price range input
   void _onSetCustomPriceRange(
       SetCustomPriceRangeEvent event, Emitter<ProductState> emit) {
     emit(state.copyWith(
@@ -89,12 +82,10 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     ));
   }
 
-  // 🔹 Rating selection
   void _onSelectRating(SelectRatingEvent event, Emitter<ProductState> emit) {
     emit(state.copyWith(selectedRating: event.rating));
   }
 
-  // 🔹 Reset all filters
   void _onResetFilters(ResetFiltersEvent event, Emitter<ProductState> emit) {
     emit(state.copyWith(
       selectedBrands: {},
@@ -106,19 +97,16 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     ));
   }
 
-  // 🔹 Apply filters
   Future<void> _onApplyFilters(
       ApplyFiltersEvent event, Emitter<ProductState> emit) async {
     emit(state.copyWith(isLoading: true));
 
     final Map<String, dynamic> apiFilters = {};
 
-    // Brands
     if (state.selectedBrands.isNotEmpty) {
       apiFilters['brands'] = state.selectedBrands.toList();
     }
 
-    // Price
     if (state.selectedPriceRange != null) {
       switch (state.selectedPriceRange) {
         case 'Under ₹250':
@@ -168,7 +156,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     }
   }
 
-  // 🔹 Refresh UI
   void _onRefreshUi(RefreshUiEvent event, Emitter<ProductState> emit) {
     emit(state.copyWith());
   }
@@ -195,12 +182,14 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     Emitter<ProductState> emit,
   ) async {
     try {
+      emit(state.copyWith(productDetailLoading: true, productDetail: null));
       final product = await repo.getProductByHandler(event.id ?? '');
       emit(state.copyWith(
-        isBrandLoading: false,
+        productDetailLoading: false,
         productDetail: product,
       ));
     } catch (e, s) {
+      emit(state.copyWith(productDetailLoading: false));
       AppLogger.trace(e, s);
     }
   }

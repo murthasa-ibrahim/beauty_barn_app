@@ -1218,6 +1218,7 @@ mixin _$ProductState {
   List<SearchProduct> get searchSuggestions;
   int get pageProduct;
   bool get haseMoreProduct;
+  bool get productDetailLoading;
 
   /// Create a copy of ProductState
   /// with the given fields replaced by the non-null parameter values.
@@ -1262,7 +1263,9 @@ mixin _$ProductState {
             (identical(other.pageProduct, pageProduct) ||
                 other.pageProduct == pageProduct) &&
             (identical(other.haseMoreProduct, haseMoreProduct) ||
-                other.haseMoreProduct == haseMoreProduct));
+                other.haseMoreProduct == haseMoreProduct) &&
+            (identical(other.productDetailLoading, productDetailLoading) ||
+                other.productDetailLoading == productDetailLoading));
   }
 
   @override
@@ -1283,11 +1286,12 @@ mixin _$ProductState {
       const DeepCollectionEquality().hash(similarProducts),
       const DeepCollectionEquality().hash(searchSuggestions),
       pageProduct,
-      haseMoreProduct);
+      haseMoreProduct,
+      productDetailLoading);
 
   @override
   String toString() {
-    return 'ProductState(isLoading: $isLoading, searchProducts: $searchProducts, selectedBrands: $selectedBrands, selectedPriceRange: $selectedPriceRange, selectedRating: $selectedRating, minPrice: $minPrice, maxPrice: $maxPrice, appliedFilters: $appliedFilters, lastQuery: $lastQuery, allBrands: $allBrands, isBrandLoading: $isBrandLoading, productDetail: $productDetail, similarProducts: $similarProducts, searchSuggestions: $searchSuggestions, pageProduct: $pageProduct, haseMoreProduct: $haseMoreProduct)';
+    return 'ProductState(isLoading: $isLoading, searchProducts: $searchProducts, selectedBrands: $selectedBrands, selectedPriceRange: $selectedPriceRange, selectedRating: $selectedRating, minPrice: $minPrice, maxPrice: $maxPrice, appliedFilters: $appliedFilters, lastQuery: $lastQuery, allBrands: $allBrands, isBrandLoading: $isBrandLoading, productDetail: $productDetail, similarProducts: $similarProducts, searchSuggestions: $searchSuggestions, pageProduct: $pageProduct, haseMoreProduct: $haseMoreProduct, productDetailLoading: $productDetailLoading)';
   }
 }
 
@@ -1313,7 +1317,8 @@ abstract mixin class $ProductStateCopyWith<$Res> {
       List<SimilarProduct> similarProducts,
       List<SearchProduct> searchSuggestions,
       int pageProduct,
-      bool haseMoreProduct});
+      bool haseMoreProduct,
+      bool productDetailLoading});
 }
 
 /// @nodoc
@@ -1344,6 +1349,7 @@ class _$ProductStateCopyWithImpl<$Res> implements $ProductStateCopyWith<$Res> {
     Object? searchSuggestions = null,
     Object? pageProduct = null,
     Object? haseMoreProduct = null,
+    Object? productDetailLoading = null,
   }) {
     return _then(_self.copyWith(
       isLoading: null == isLoading
@@ -1409,6 +1415,10 @@ class _$ProductStateCopyWithImpl<$Res> implements $ProductStateCopyWith<$Res> {
       haseMoreProduct: null == haseMoreProduct
           ? _self.haseMoreProduct
           : haseMoreProduct // ignore: cast_nullable_to_non_nullable
+              as bool,
+      productDetailLoading: null == productDetailLoading
+          ? _self.productDetailLoading
+          : productDetailLoading // ignore: cast_nullable_to_non_nullable
               as bool,
     ));
   }
@@ -1523,7 +1533,8 @@ extension ProductStatePatterns on ProductState {
             List<SimilarProduct> similarProducts,
             List<SearchProduct> searchSuggestions,
             int pageProduct,
-            bool haseMoreProduct)?
+            bool haseMoreProduct,
+            bool productDetailLoading)?
         $default, {
     required TResult orElse(),
   }) {
@@ -1546,7 +1557,8 @@ extension ProductStatePatterns on ProductState {
             _that.similarProducts,
             _that.searchSuggestions,
             _that.pageProduct,
-            _that.haseMoreProduct);
+            _that.haseMoreProduct,
+            _that.productDetailLoading);
       case _:
         return orElse();
     }
@@ -1583,7 +1595,8 @@ extension ProductStatePatterns on ProductState {
             List<SimilarProduct> similarProducts,
             List<SearchProduct> searchSuggestions,
             int pageProduct,
-            bool haseMoreProduct)
+            bool haseMoreProduct,
+            bool productDetailLoading)
         $default,
   ) {
     final _that = this;
@@ -1605,7 +1618,8 @@ extension ProductStatePatterns on ProductState {
             _that.similarProducts,
             _that.searchSuggestions,
             _that.pageProduct,
-            _that.haseMoreProduct);
+            _that.haseMoreProduct,
+            _that.productDetailLoading);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -1641,7 +1655,8 @@ extension ProductStatePatterns on ProductState {
             List<SimilarProduct> similarProducts,
             List<SearchProduct> searchSuggestions,
             int pageProduct,
-            bool haseMoreProduct)?
+            bool haseMoreProduct,
+            bool productDetailLoading)?
         $default,
   ) {
     final _that = this;
@@ -1663,7 +1678,8 @@ extension ProductStatePatterns on ProductState {
             _that.similarProducts,
             _that.searchSuggestions,
             _that.pageProduct,
-            _that.haseMoreProduct);
+            _that.haseMoreProduct,
+            _that.productDetailLoading);
       case _:
         return null;
     }
@@ -1689,7 +1705,8 @@ class _ProductState implements ProductState {
       required final List<SimilarProduct> similarProducts,
       required final List<SearchProduct> searchSuggestions,
       required this.pageProduct,
-      required this.haseMoreProduct})
+      required this.haseMoreProduct,
+      required this.productDetailLoading})
       : _searchProducts = searchProducts,
         _selectedBrands = selectedBrands,
         _appliedFilters = appliedFilters,
@@ -1768,6 +1785,8 @@ class _ProductState implements ProductState {
   final int pageProduct;
   @override
   final bool haseMoreProduct;
+  @override
+  final bool productDetailLoading;
 
   /// Create a copy of ProductState
   /// with the given fields replaced by the non-null parameter values.
@@ -1813,7 +1832,9 @@ class _ProductState implements ProductState {
             (identical(other.pageProduct, pageProduct) ||
                 other.pageProduct == pageProduct) &&
             (identical(other.haseMoreProduct, haseMoreProduct) ||
-                other.haseMoreProduct == haseMoreProduct));
+                other.haseMoreProduct == haseMoreProduct) &&
+            (identical(other.productDetailLoading, productDetailLoading) ||
+                other.productDetailLoading == productDetailLoading));
   }
 
   @override
@@ -1834,11 +1855,12 @@ class _ProductState implements ProductState {
       const DeepCollectionEquality().hash(_similarProducts),
       const DeepCollectionEquality().hash(_searchSuggestions),
       pageProduct,
-      haseMoreProduct);
+      haseMoreProduct,
+      productDetailLoading);
 
   @override
   String toString() {
-    return 'ProductState(isLoading: $isLoading, searchProducts: $searchProducts, selectedBrands: $selectedBrands, selectedPriceRange: $selectedPriceRange, selectedRating: $selectedRating, minPrice: $minPrice, maxPrice: $maxPrice, appliedFilters: $appliedFilters, lastQuery: $lastQuery, allBrands: $allBrands, isBrandLoading: $isBrandLoading, productDetail: $productDetail, similarProducts: $similarProducts, searchSuggestions: $searchSuggestions, pageProduct: $pageProduct, haseMoreProduct: $haseMoreProduct)';
+    return 'ProductState(isLoading: $isLoading, searchProducts: $searchProducts, selectedBrands: $selectedBrands, selectedPriceRange: $selectedPriceRange, selectedRating: $selectedRating, minPrice: $minPrice, maxPrice: $maxPrice, appliedFilters: $appliedFilters, lastQuery: $lastQuery, allBrands: $allBrands, isBrandLoading: $isBrandLoading, productDetail: $productDetail, similarProducts: $similarProducts, searchSuggestions: $searchSuggestions, pageProduct: $pageProduct, haseMoreProduct: $haseMoreProduct, productDetailLoading: $productDetailLoading)';
   }
 }
 
@@ -1866,7 +1888,8 @@ abstract mixin class _$ProductStateCopyWith<$Res>
       List<SimilarProduct> similarProducts,
       List<SearchProduct> searchSuggestions,
       int pageProduct,
-      bool haseMoreProduct});
+      bool haseMoreProduct,
+      bool productDetailLoading});
 }
 
 /// @nodoc
@@ -1898,6 +1921,7 @@ class __$ProductStateCopyWithImpl<$Res>
     Object? searchSuggestions = null,
     Object? pageProduct = null,
     Object? haseMoreProduct = null,
+    Object? productDetailLoading = null,
   }) {
     return _then(_ProductState(
       isLoading: null == isLoading
@@ -1963,6 +1987,10 @@ class __$ProductStateCopyWithImpl<$Res>
       haseMoreProduct: null == haseMoreProduct
           ? _self.haseMoreProduct
           : haseMoreProduct // ignore: cast_nullable_to_non_nullable
+              as bool,
+      productDetailLoading: null == productDetailLoading
+          ? _self.productDetailLoading
+          : productDetailLoading // ignore: cast_nullable_to_non_nullable
               as bool,
     ));
   }

@@ -1,7 +1,6 @@
 import 'package:machine_test_superlabs/config/dependency_injection/dependency_injection.dart';
 import 'package:machine_test_superlabs/src/features/product_search/model/brand_model.dart';
 import 'package:machine_test_superlabs/src/features/product_search/model/product_detail_model.dart';
-import 'package:machine_test_superlabs/src/features/product_search/model/product_model.dart';
 import 'package:machine_test_superlabs/src/features/product_search/model/product_search_model.dart';
 import 'package:machine_test_superlabs/src/features/product_search/model/similar_product.dart';
 import 'package:machine_test_superlabs/src/utils/logger/app_logger.dart';
@@ -27,7 +26,6 @@ class ProductRepo {
     String? sortBy,
   }) async {
     try {
-      // Build query parameters dynamically
       final Map<String, dynamic> queryParams = {
         'q': query,
         'page': page,
@@ -72,8 +70,8 @@ class ProductRepo {
     }
   }
 
-  /// 🔹 Suggestions
-  Future<SearchProductResponse ?> getSuggestions(String query) async {
+
+  Future<SearchProductResponse?> getSuggestions(String query) async {
     try {
       final response = await _apiService.get(
         EndPoints.searchSuggestion,
