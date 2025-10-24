@@ -1,12 +1,16 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:machine_test_superlabs/config/constants/constants.dart';
 import 'package:machine_test_superlabs/config/routes/routes.dart';
 import 'package:machine_test_superlabs/src/features/product_search/model/product_search_model.dart';
 import 'package:machine_test_superlabs/src/features/product_search/presentation/pages/filter_page.dart';
+import 'package:machine_test_superlabs/src/features/product_search/presentation/pages/widget/shimmer.dart';
 import 'package:machine_test_superlabs/src/services/remote/base/base.dart';
+import '../../../../utils/logger/app_logger.dart';
 import '../bloc/product_bloc/product_bloc.dart';
 
 class SearchPage extends StatefulWidget {
@@ -25,7 +29,8 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-  final TextEditingController _controller = TextEditingController();
+  ScrollController? productScrollCtrl;
+  late TextEditingController _controller;
   final FocusNode _focusNode = FocusNode();
   Timer? _debounce;
   String _selectedCategory = '';
@@ -33,7 +38,17 @@ class _SearchPageState extends State<SearchPage> {
   @override
   void initState() {
     super.initState();
-    // Optionally prefetch popular suggestions or brands if needed
+    productScrollCtrl = ScrollController();
+    _controller = TextEditingController();
+    productScrollCtrl?.addListener(() {
+      if (productScrollCtrl?.position.maxScrollExtent ==
+              productScrollCtrl?.offset &&
+          BlocProvider.of<ProductBloc>(context).state.haseMoreProduct == true) {
+        AppLogger.e("Load more data");
+        BlocProvider.of<ProductBloc>(context)
+            .add(ProductEvent.productListPagination());
+      }
+    });
   }
 
   @override
@@ -41,6 +56,8 @@ class _SearchPageState extends State<SearchPage> {
     _debounce?.cancel();
     _controller.dispose();
     _focusNode.dispose();
+    productScrollCtrl?.dispose();
+
     super.dispose();
   }
 
@@ -136,189 +153,223 @@ class _SearchPageState extends State<SearchPage> {
 
     return PopScope(
       canPop: false,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text("Search Products"),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.filter_list),
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => ProductFilterPage(),
-                ));
-              },
-            ),
-          ],
-        ),
-        body: Column(
-          children: [
-            // Search + suggestions area
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                children: [
-                  TextField(
-                    controller: _controller,
-                    focusNode: _focusNode,
-                    textInputAction: TextInputAction.search,
-                    decoration: InputDecoration(
-                      labelText: 'Search products...',
-                      border: const OutlineInputBorder(),
-                      prefixIcon: const Icon(Icons.search),
-                      suffixIcon: _controller.text.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear),
-                              onPressed: () {
-                                _controller.clear();
-                                context
-                                    .read<ProductBloc>()
-                                    .add(ProductEvent.refreshUi());
-                                context
-                                    .read<ProductBloc>()
-                                    .add(ProductEvent.clearSearchSuggestions());
-                              },
-                            )
-                          : null,
-                    ),
-                    onChanged: _onSearchChanged,
-                    onSubmitted: _onSubmitted,
-                  ),
-
-                  // Suggestions list (shows only when suggestions available & 2+ chars)
-                  BlocBuilder<ProductBloc, ProductState>(
-                    builder: (context, state) {
-                      final suggestions = state.searchSuggestions;
-                      if (_controller.text.trim().length < 2 ||
-                          suggestions.isEmpty) {
-                        return const SizedBox.shrink();
-                      }
-
-                      // constrained box prevents overflow when keyboard open
-                      return Container(
-                        margin: const EdgeInsets.only(top: 8),
-                        constraints: BoxConstraints(
-                          maxHeight: maxSuggestionHeight,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: Border.all(color: Colors.grey.shade300),
-                          borderRadius: BorderRadius.circular(8),
-                          boxShadow: [
-                            BoxShadow(
-                              blurRadius: 6,
-                              color: Colors.black.withOpacity(0.06),
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: ListView.separated(
-                          shrinkWrap: true,
-                          physics: const ClampingScrollPhysics(),
-                          itemCount: suggestions.length,
-                          separatorBuilder: (_, __) => const Divider(height: 1),
-                          itemBuilder: (context, index) {
-                            final suggestion = suggestions[index];
-                            return _buildSuggestionTile(context, suggestion);
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-
-            // Categories Row
-            SizedBox(
-              height: 50,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                itemCount: widget.categories.length,
-                itemBuilder: (context, index) {
-                  final category = widget.categories[index];
-                  final isSelected = category == _selectedCategory;
-
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: ChoiceChip(
-                      label: Text(category),
-                      selected: isSelected,
-                      onSelected: (selected) {
-                        setState(() {
-                          _selectedCategory = selected ? category : '';
-                        });
-                        context.read<ProductBloc>().add(
-                              ProductEvent.searchProductsEvent(
-                                query: category.toLowerCase(),
-                              ),
-                            );
-                      },
-                    ),
-                  );
+      child: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text("Search Products"),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.filter_list),
+                onPressed: () {
+                  FocusScope.of(context).unfocus();
+                  context.push(Routes.filter);
                 },
               ),
-            ),
-
-            // Filters Row
-            SizedBox(
-              height: 50,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                children: const [
-                  FilterChipWidget(label: 'Brand'),
-                  FilterChipWidget(label: 'Product Type'),
-                  FilterChipWidget(label: 'Skin Concern'),
-                  FilterChipWidget(label: 'Skin Type'),
-                  FilterChipWidget(label: 'Price'),
-                ],
-              ),
-            ),
-
-            // Products Grid (flexible so suggestions/keyboard don't overflow)
-            Expanded(
-              child: BlocBuilder<ProductBloc, ProductState>(
-                builder: (context, state) {
-                  if (state.isLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (state.searchProducts.isNotEmpty) {
-                    return GridView.builder(
-                      padding: const EdgeInsets.all(12),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 12,
-                        crossAxisSpacing: 12,
-                        childAspectRatio:
-                            0.6, // adjusted for better card height
+            ],
+          ),
+          body: Column(
+            children: [
+              // Search + suggestions area
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: _controller,
+                      focusNode: _focusNode,
+                      textInputAction: TextInputAction.search,
+                      decoration: InputDecoration(
+                        labelText: 'Search products...',
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.search),
+                        suffixIcon: _controller.text.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear),
+                                onPressed: () {
+                                  _controller.clear();
+                                  context
+                                      .read<ProductBloc>()
+                                      .add(ProductEvent.refreshUi());
+                                  context.read<ProductBloc>().add(
+                                      ProductEvent.clearSearchSuggestions());
+                                },
+                              )
+                            : null,
                       ),
-                      itemCount: state.searchProducts.length,
-                      itemBuilder: (context, index) {
-                        final product = state.searchProducts[index];
-                        return ProductCard(
-                          product: product,
-                          onTap: () {
-                            // dispatch detail + similar and navigate (schedule navigation)
-                            context.read<ProductBloc>().add(
-                                ProductEvent.getProductDetail(
-                                    id: product.handle));
-                            context.read<ProductBloc>().add(
-                                ProductEvent.getSimilarProductsEvent(
-                                    productId: product.id ?? ''));
-                            Future.microtask(
-                                () => context.push(Routes.productDetail));
-                          },
+                      onChanged: _onSearchChanged,
+                      onSubmitted: _onSubmitted,
+                    ),
+
+                    // Suggestions list (shows only when suggestions available & 2+ chars)
+                    BlocBuilder<ProductBloc, ProductState>(
+                      builder: (context, state) {
+                        final suggestions = state.searchSuggestions;
+                        if (_controller.text.trim().length < 2 ||
+                            suggestions.isEmpty) {
+                          return const SizedBox.shrink();
+                        }
+
+                        // constrained box prevents overflow when keyboard open
+                        return Container(
+                          margin: const EdgeInsets.only(top: 8),
+                          constraints: BoxConstraints(
+                            maxHeight: maxSuggestionHeight,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(color: Colors.grey.shade300),
+                            borderRadius: BorderRadius.circular(8),
+                            boxShadow: [
+                              BoxShadow(
+                                blurRadius: 6,
+                                color: Colors.black.withOpacity(0.06),
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: ListView.separated(
+                            shrinkWrap: true,
+                            physics: const ClampingScrollPhysics(),
+                            itemCount: suggestions.length,
+                            separatorBuilder: (_, __) =>
+                                const Divider(height: 1),
+                            itemBuilder: (context, index) {
+                              final suggestion = suggestions[index];
+                              return _buildSuggestionTile(context, suggestion);
+                            },
+                          ),
                         );
                       },
-                    );
-                  } else {
-                    return const Center(child: Text("Search for products..."));
-                  }
-                },
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+
+              // Categories Row
+              SizedBox(
+                height: 50,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  itemCount: widget.categories.length,
+                  itemBuilder: (context, index) {
+                    final category = widget.categories[index];
+                    final isSelected = category == _selectedCategory;
+
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: ChoiceChip(
+                        label: Text(category),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          setState(() {
+                            _selectedCategory = selected ? category : '';
+                          });
+                          context.read<ProductBloc>().add(
+                                ProductEvent.searchProductsEvent(
+                                  query: category.toLowerCase(),
+                                ),
+                              );
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+
+              // Filters Row
+              SizedBox(
+                height: 50,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  children: const [
+                    FilterChipWidget(label: 'Brand'),
+                    FilterChipWidget(label: 'Product Type'),
+                    FilterChipWidget(label: 'Skin Concern'),
+                    FilterChipWidget(label: 'Skin Type'),
+                    FilterChipWidget(label: 'Price'),
+                  ],
+                ),
+              ),
+
+              // Products Grid (flexible so suggestions/keyboard don't overflow)
+              Expanded(
+                child: BlocBuilder<ProductBloc, ProductState>(
+                  builder: (context, state) {
+                    if (state.isLoading) {
+                      // show grid skeleton instead of circular loader
+                      return GridView.builder(
+                        padding: const EdgeInsets.all(12),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 12,
+                          crossAxisSpacing: 12,
+                          childAspectRatio: 0.6,
+                        ),
+                        itemCount: 6, // number of skeleton items to show
+                        itemBuilder: (context, index) {
+                          return const ProductCardSkeleton();
+                        },
+                      );
+                    } else if (state.searchProducts.isNotEmpty) {
+                      return GridView.builder(
+                        controller: productScrollCtrl,
+                        padding: const EdgeInsets.all(12),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 12,
+                          crossAxisSpacing: 12,
+                          childAspectRatio: 0.6,
+                        ),
+                        itemCount: state.searchProducts.length + 1,
+                        itemBuilder: (context, index) {
+                          //final product = state.searchProducts[index];
+                          if (index < state.searchProducts.length) {
+                            return ProductCard(
+                              product: state.searchProducts[index],
+                              onTap: () {
+                                // dispatch detail + similar and navigate (schedule navigation)
+                                context.read<ProductBloc>().add(
+                                    ProductEvent.getProductDetail(
+                                        id: state
+                                            .searchProducts[index].handle));
+                                context.read<ProductBloc>().add(
+                                    ProductEvent.getSimilarProductsEvent(
+                                        productId:
+                                            state.searchProducts[index].id ??
+                                                ''));
+
+                                Future.microtask(
+                                    () => context.push(Routes.productDetail));
+                              },
+                            );
+                          } else {
+                            return state.haseMoreProduct && index > 5
+                                ? const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 16),
+                                    child: Center(
+                                      child: CupertinoActivityIndicator(),
+                                    ),
+                                  )
+                                : kWhiteSpace;
+                          }
+                        },
+                      );
+                    } else {
+                      return const Center(
+                          child: Text("Search for products..."));
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

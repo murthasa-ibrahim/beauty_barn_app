@@ -31,6 +31,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     on<GetSimilarProductsEvent>(_getSimilarProduct);
     on<GetSearchSuggestion>(_getSuggestion);
     on<ClearSearchSuggestions>(_clearSuggestions);
+    on<ProductListPagination>(_productPagination);
   }
 
   // 🔹 Search products
@@ -39,6 +40,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     emit(state.copyWith(isLoading: true));
 
     try {
+      emit(state.copyWith(pageProduct: 1, haseMoreProduct: true));
       final res = await repo.searchProducts(
         query: event.query,
         page: 1,
@@ -48,7 +50,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       emit(state.copyWith(
         isLoading: false,
         searchProducts: res?.products ?? [],
-        lastQuery: event.query, // Track the search query
+        lastQuery: event.query,
       ));
     } catch (e, s) {
       AppLogger.trace(e, s);
@@ -237,5 +239,36 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     Emitter<ProductState> emit,
   ) {
     emit(state.copyWith(searchSuggestions: []));
+  }
+
+  _productPagination(
+      ProductListPagination event, Emitter<ProductState> emit) async {
+    try {
+      emit(state.copyWith(
+        pageProduct: state.pageProduct + 1,
+      ));
+      final response = await repo.searchProducts(
+        page: state.pageProduct,
+        query: state.lastQuery ?? '',
+      );
+      if (response != null) {
+        AppLogger.d("inside not null---------------");
+        List<SearchProduct> newList = List.from(state.searchProducts);
+
+        newList.addAll(response.products ?? []);
+        if (response.products?.isEmpty ?? false) {
+          AppLogger.d("making false---------------");
+          return emit(state.copyWith(haseMoreProduct: false));
+        }
+
+        return emit(state.copyWith(searchProducts: newList));
+      } else {
+        return emit(state.copyWith(haseMoreProduct: false));
+      }
+    } catch (e) {
+      AppLogger.e(e);
+
+      return emit(state.copyWith(haseMoreProduct: false));
+    }
   }
 }

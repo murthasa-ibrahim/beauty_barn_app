@@ -17,6 +17,9 @@ abstract class ProductState with _$ProductState {
     required ProductDetailData? productDetail,
     required List<SimilarProduct> similarProducts,
     required List<SearchProduct> searchSuggestions,
+    required int pageProduct,
+    required bool haseMoreProduct,
+    
   }) = _ProductState;
 
   factory ProductState.initial() => const ProductState(
@@ -32,7 +35,10 @@ abstract class ProductState with _$ProductState {
         allBrands: [],
         isBrandLoading: false,
         productDetail: null,
-        similarProducts:[],
-        searchSuggestions:[],
+        similarProducts: [],
+        searchSuggestions: [],
+        pageProduct: 1,
+        haseMoreProduct: true,
+       
       );
 }

@@ -27,4 +27,5 @@ class ProductEvent with _$ProductEvent {
   const factory ProductEvent.getSearchSuggestion({String? query}) =
       GetSearchSuggestion;
   const factory ProductEvent.clearSearchSuggestions() = ClearSearchSuggestions;
+  const factory ProductEvent.productListPagination() = ProductListPagination;
 }

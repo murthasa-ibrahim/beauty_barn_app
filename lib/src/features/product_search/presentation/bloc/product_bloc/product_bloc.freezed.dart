@@ -64,6 +64,7 @@ extension ProductEventPatterns on ProductEvent {
     TResult Function(GetProductDetail value)? getProductDetail,
     TResult Function(GetSearchSuggestion value)? getSearchSuggestion,
     TResult Function(ClearSearchSuggestions value)? clearSearchSuggestions,
+    TResult Function(ProductListPagination value)? productListPagination,
     required TResult orElse(),
   }) {
     final _that = this;
@@ -96,6 +97,8 @@ extension ProductEventPatterns on ProductEvent {
         return getSearchSuggestion(_that);
       case ClearSearchSuggestions() when clearSearchSuggestions != null:
         return clearSearchSuggestions(_that);
+      case ProductListPagination() when productListPagination != null:
+        return productListPagination(_that);
       case _:
         return orElse();
     }
@@ -134,6 +137,8 @@ extension ProductEventPatterns on ProductEvent {
     required TResult Function(GetSearchSuggestion value) getSearchSuggestion,
     required TResult Function(ClearSearchSuggestions value)
         clearSearchSuggestions,
+    required TResult Function(ProductListPagination value)
+        productListPagination,
   }) {
     final _that = this;
     switch (_that) {
@@ -165,6 +170,8 @@ extension ProductEventPatterns on ProductEvent {
         return getSearchSuggestion(_that);
       case ClearSearchSuggestions():
         return clearSearchSuggestions(_that);
+      case ProductListPagination():
+        return productListPagination(_that);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -198,6 +205,7 @@ extension ProductEventPatterns on ProductEvent {
     TResult? Function(GetProductDetail value)? getProductDetail,
     TResult? Function(GetSearchSuggestion value)? getSearchSuggestion,
     TResult? Function(ClearSearchSuggestions value)? clearSearchSuggestions,
+    TResult? Function(ProductListPagination value)? productListPagination,
   }) {
     final _that = this;
     switch (_that) {
@@ -229,6 +237,8 @@ extension ProductEventPatterns on ProductEvent {
         return getSearchSuggestion(_that);
       case ClearSearchSuggestions() when clearSearchSuggestions != null:
         return clearSearchSuggestions(_that);
+      case ProductListPagination() when productListPagination != null:
+        return productListPagination(_that);
       case _:
         return null;
     }
@@ -262,6 +272,7 @@ extension ProductEventPatterns on ProductEvent {
     TResult Function(String? id)? getProductDetail,
     TResult Function(String? query)? getSearchSuggestion,
     TResult Function()? clearSearchSuggestions,
+    TResult Function()? productListPagination,
     required TResult orElse(),
   }) {
     final _that = this;
@@ -294,6 +305,8 @@ extension ProductEventPatterns on ProductEvent {
         return getSearchSuggestion(_that.query);
       case ClearSearchSuggestions() when clearSearchSuggestions != null:
         return clearSearchSuggestions();
+      case ProductListPagination() when productListPagination != null:
+        return productListPagination();
       case _:
         return orElse();
     }
@@ -328,6 +341,7 @@ extension ProductEventPatterns on ProductEvent {
     required TResult Function(String? id) getProductDetail,
     required TResult Function(String? query) getSearchSuggestion,
     required TResult Function() clearSearchSuggestions,
+    required TResult Function() productListPagination,
   }) {
     final _that = this;
     switch (_that) {
@@ -359,6 +373,8 @@ extension ProductEventPatterns on ProductEvent {
         return getSearchSuggestion(_that.query);
       case ClearSearchSuggestions():
         return clearSearchSuggestions();
+      case ProductListPagination():
+        return productListPagination();
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -392,6 +408,7 @@ extension ProductEventPatterns on ProductEvent {
     TResult? Function(String? id)? getProductDetail,
     TResult? Function(String? query)? getSearchSuggestion,
     TResult? Function()? clearSearchSuggestions,
+    TResult? Function()? productListPagination,
   }) {
     final _that = this;
     switch (_that) {
@@ -423,6 +440,8 @@ extension ProductEventPatterns on ProductEvent {
         return getSearchSuggestion(_that.query);
       case ClearSearchSuggestions() when clearSearchSuggestions != null:
         return clearSearchSuggestions();
+      case ProductListPagination() when productListPagination != null:
+        return productListPagination();
       case _:
         return null;
     }
@@ -1162,6 +1181,26 @@ class ClearSearchSuggestions implements ProductEvent {
 }
 
 /// @nodoc
+
+class ProductListPagination implements ProductEvent {
+  const ProductListPagination();
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is ProductListPagination);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  String toString() {
+    return 'ProductEvent.productListPagination()';
+  }
+}
+
+/// @nodoc
 mixin _$ProductState {
   bool get isLoading;
   List<SearchProduct> get searchProducts;
@@ -1177,6 +1216,8 @@ mixin _$ProductState {
   ProductDetailData? get productDetail;
   List<SimilarProduct> get similarProducts;
   List<SearchProduct> get searchSuggestions;
+  int get pageProduct;
+  bool get haseMoreProduct;
 
   /// Create a copy of ProductState
   /// with the given fields replaced by the non-null parameter values.
@@ -1217,7 +1258,11 @@ mixin _$ProductState {
             const DeepCollectionEquality()
                 .equals(other.similarProducts, similarProducts) &&
             const DeepCollectionEquality()
-                .equals(other.searchSuggestions, searchSuggestions));
+                .equals(other.searchSuggestions, searchSuggestions) &&
+            (identical(other.pageProduct, pageProduct) ||
+                other.pageProduct == pageProduct) &&
+            (identical(other.haseMoreProduct, haseMoreProduct) ||
+                other.haseMoreProduct == haseMoreProduct));
   }
 
   @override
@@ -1236,11 +1281,13 @@ mixin _$ProductState {
       isBrandLoading,
       productDetail,
       const DeepCollectionEquality().hash(similarProducts),
-      const DeepCollectionEquality().hash(searchSuggestions));
+      const DeepCollectionEquality().hash(searchSuggestions),
+      pageProduct,
+      haseMoreProduct);
 
   @override
   String toString() {
-    return 'ProductState(isLoading: $isLoading, searchProducts: $searchProducts, selectedBrands: $selectedBrands, selectedPriceRange: $selectedPriceRange, selectedRating: $selectedRating, minPrice: $minPrice, maxPrice: $maxPrice, appliedFilters: $appliedFilters, lastQuery: $lastQuery, allBrands: $allBrands, isBrandLoading: $isBrandLoading, productDetail: $productDetail, similarProducts: $similarProducts, searchSuggestions: $searchSuggestions)';
+    return 'ProductState(isLoading: $isLoading, searchProducts: $searchProducts, selectedBrands: $selectedBrands, selectedPriceRange: $selectedPriceRange, selectedRating: $selectedRating, minPrice: $minPrice, maxPrice: $maxPrice, appliedFilters: $appliedFilters, lastQuery: $lastQuery, allBrands: $allBrands, isBrandLoading: $isBrandLoading, productDetail: $productDetail, similarProducts: $similarProducts, searchSuggestions: $searchSuggestions, pageProduct: $pageProduct, haseMoreProduct: $haseMoreProduct)';
   }
 }
 
@@ -1264,7 +1311,9 @@ abstract mixin class $ProductStateCopyWith<$Res> {
       bool isBrandLoading,
       ProductDetailData? productDetail,
       List<SimilarProduct> similarProducts,
-      List<SearchProduct> searchSuggestions});
+      List<SearchProduct> searchSuggestions,
+      int pageProduct,
+      bool haseMoreProduct});
 }
 
 /// @nodoc
@@ -1293,6 +1342,8 @@ class _$ProductStateCopyWithImpl<$Res> implements $ProductStateCopyWith<$Res> {
     Object? productDetail = freezed,
     Object? similarProducts = null,
     Object? searchSuggestions = null,
+    Object? pageProduct = null,
+    Object? haseMoreProduct = null,
   }) {
     return _then(_self.copyWith(
       isLoading: null == isLoading
@@ -1351,6 +1402,14 @@ class _$ProductStateCopyWithImpl<$Res> implements $ProductStateCopyWith<$Res> {
           ? _self.searchSuggestions
           : searchSuggestions // ignore: cast_nullable_to_non_nullable
               as List<SearchProduct>,
+      pageProduct: null == pageProduct
+          ? _self.pageProduct
+          : pageProduct // ignore: cast_nullable_to_non_nullable
+              as int,
+      haseMoreProduct: null == haseMoreProduct
+          ? _self.haseMoreProduct
+          : haseMoreProduct // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -1462,7 +1521,9 @@ extension ProductStatePatterns on ProductState {
             bool isBrandLoading,
             ProductDetailData? productDetail,
             List<SimilarProduct> similarProducts,
-            List<SearchProduct> searchSuggestions)?
+            List<SearchProduct> searchSuggestions,
+            int pageProduct,
+            bool haseMoreProduct)?
         $default, {
     required TResult orElse(),
   }) {
@@ -1483,7 +1544,9 @@ extension ProductStatePatterns on ProductState {
             _that.isBrandLoading,
             _that.productDetail,
             _that.similarProducts,
-            _that.searchSuggestions);
+            _that.searchSuggestions,
+            _that.pageProduct,
+            _that.haseMoreProduct);
       case _:
         return orElse();
     }
@@ -1518,7 +1581,9 @@ extension ProductStatePatterns on ProductState {
             bool isBrandLoading,
             ProductDetailData? productDetail,
             List<SimilarProduct> similarProducts,
-            List<SearchProduct> searchSuggestions)
+            List<SearchProduct> searchSuggestions,
+            int pageProduct,
+            bool haseMoreProduct)
         $default,
   ) {
     final _that = this;
@@ -1538,7 +1603,9 @@ extension ProductStatePatterns on ProductState {
             _that.isBrandLoading,
             _that.productDetail,
             _that.similarProducts,
-            _that.searchSuggestions);
+            _that.searchSuggestions,
+            _that.pageProduct,
+            _that.haseMoreProduct);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -1572,7 +1639,9 @@ extension ProductStatePatterns on ProductState {
             bool isBrandLoading,
             ProductDetailData? productDetail,
             List<SimilarProduct> similarProducts,
-            List<SearchProduct> searchSuggestions)?
+            List<SearchProduct> searchSuggestions,
+            int pageProduct,
+            bool haseMoreProduct)?
         $default,
   ) {
     final _that = this;
@@ -1592,7 +1661,9 @@ extension ProductStatePatterns on ProductState {
             _that.isBrandLoading,
             _that.productDetail,
             _that.similarProducts,
-            _that.searchSuggestions);
+            _that.searchSuggestions,
+            _that.pageProduct,
+            _that.haseMoreProduct);
       case _:
         return null;
     }
@@ -1616,7 +1687,9 @@ class _ProductState implements ProductState {
       required this.isBrandLoading,
       required this.productDetail,
       required final List<SimilarProduct> similarProducts,
-      required final List<SearchProduct> searchSuggestions})
+      required final List<SearchProduct> searchSuggestions,
+      required this.pageProduct,
+      required this.haseMoreProduct})
       : _searchProducts = searchProducts,
         _selectedBrands = selectedBrands,
         _appliedFilters = appliedFilters,
@@ -1691,6 +1764,11 @@ class _ProductState implements ProductState {
     return EqualUnmodifiableListView(_searchSuggestions);
   }
 
+  @override
+  final int pageProduct;
+  @override
+  final bool haseMoreProduct;
+
   /// Create a copy of ProductState
   /// with the given fields replaced by the non-null parameter values.
   @override
@@ -1731,7 +1809,11 @@ class _ProductState implements ProductState {
             const DeepCollectionEquality()
                 .equals(other._similarProducts, _similarProducts) &&
             const DeepCollectionEquality()
-                .equals(other._searchSuggestions, _searchSuggestions));
+                .equals(other._searchSuggestions, _searchSuggestions) &&
+            (identical(other.pageProduct, pageProduct) ||
+                other.pageProduct == pageProduct) &&
+            (identical(other.haseMoreProduct, haseMoreProduct) ||
+                other.haseMoreProduct == haseMoreProduct));
   }
 
   @override
@@ -1750,11 +1832,13 @@ class _ProductState implements ProductState {
       isBrandLoading,
       productDetail,
       const DeepCollectionEquality().hash(_similarProducts),
-      const DeepCollectionEquality().hash(_searchSuggestions));
+      const DeepCollectionEquality().hash(_searchSuggestions),
+      pageProduct,
+      haseMoreProduct);
 
   @override
   String toString() {
-    return 'ProductState(isLoading: $isLoading, searchProducts: $searchProducts, selectedBrands: $selectedBrands, selectedPriceRange: $selectedPriceRange, selectedRating: $selectedRating, minPrice: $minPrice, maxPrice: $maxPrice, appliedFilters: $appliedFilters, lastQuery: $lastQuery, allBrands: $allBrands, isBrandLoading: $isBrandLoading, productDetail: $productDetail, similarProducts: $similarProducts, searchSuggestions: $searchSuggestions)';
+    return 'ProductState(isLoading: $isLoading, searchProducts: $searchProducts, selectedBrands: $selectedBrands, selectedPriceRange: $selectedPriceRange, selectedRating: $selectedRating, minPrice: $minPrice, maxPrice: $maxPrice, appliedFilters: $appliedFilters, lastQuery: $lastQuery, allBrands: $allBrands, isBrandLoading: $isBrandLoading, productDetail: $productDetail, similarProducts: $similarProducts, searchSuggestions: $searchSuggestions, pageProduct: $pageProduct, haseMoreProduct: $haseMoreProduct)';
   }
 }
 
@@ -1780,7 +1864,9 @@ abstract mixin class _$ProductStateCopyWith<$Res>
       bool isBrandLoading,
       ProductDetailData? productDetail,
       List<SimilarProduct> similarProducts,
-      List<SearchProduct> searchSuggestions});
+      List<SearchProduct> searchSuggestions,
+      int pageProduct,
+      bool haseMoreProduct});
 }
 
 /// @nodoc
@@ -1810,6 +1896,8 @@ class __$ProductStateCopyWithImpl<$Res>
     Object? productDetail = freezed,
     Object? similarProducts = null,
     Object? searchSuggestions = null,
+    Object? pageProduct = null,
+    Object? haseMoreProduct = null,
   }) {
     return _then(_ProductState(
       isLoading: null == isLoading
@@ -1868,6 +1956,14 @@ class __$ProductStateCopyWithImpl<$Res>
           ? _self._searchSuggestions
           : searchSuggestions // ignore: cast_nullable_to_non_nullable
               as List<SearchProduct>,
+      pageProduct: null == pageProduct
+          ? _self.pageProduct
+          : pageProduct // ignore: cast_nullable_to_non_nullable
+              as int,
+      haseMoreProduct: null == haseMoreProduct
+          ? _self.haseMoreProduct
+          : haseMoreProduct // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }

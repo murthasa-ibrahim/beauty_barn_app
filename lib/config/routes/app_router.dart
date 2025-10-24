@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:machine_test_superlabs/config/routes/routes.dart';
 import 'package:machine_test_superlabs/src/features/auth/presentaion/splash_screen.dart';
+import 'package:machine_test_superlabs/src/features/product_search/presentation/pages/filter_page.dart';
 import 'package:machine_test_superlabs/src/features/product_search/presentation/pages/product_detail_page.dart';
 import 'package:machine_test_superlabs/src/features/product_search/presentation/pages/search_page.dart';
 
@@ -27,6 +28,11 @@ class NavigationService {
           path: Routes.search,
           name: RouteNames.search,
           builder: (context, state) => SearchPage(),
+        ),
+        GoRoute(
+          path: Routes.filter,
+          name: RouteNames.filter,
+          builder: (context, state) => ProductFilterPage(),
         ),
         GoRoute(
           path: Routes.productDetail,
